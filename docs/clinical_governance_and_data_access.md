@@ -51,7 +51,7 @@ The NHREC public register lists institutional HRECs including University of Nige
 
 For a non-LUTH researcher, LUTH's HREC guidance explicitly asks for an institutional collaborator or institutional co-supervisor. The same practical principle should be followed elsewhere: approach a clinical department and research office through a named institutional collaborator rather than requesting raw patient data informally.
 
-## 7. Immediate partner-engagement sequence
+## 7. Data leads screened (not approved datasets)\n\nA separate screening log records the candidate Mendeley deposits and the FMOH/CIHP data-access routes. The UITH/Offa-labelled 768-row release is excluded because repository inspection found it to be the Pima benchmark. A separate 1,500-record Mendeley diabetes dataset is an unverified lead: its public description does not establish named hospitals, site labels, ethics approval or secondary-use rights. The FMOH Health Partners' Projects & Data Mapping Platform requires an approved research-user account; no eligible patient-level diabetes cohort has yet been confirmed. These leads must pass the verification checklist in `docs/nigerian_data_source_screening.md` before use.\n\n## 8. Immediate partner-engagement sequence
 
 1. Secure a clinical PI and statistician/epidemiologist.
 2. Send a two-page concept note and request a feasibility meeting with the hospital research office/HREC secretariat.
