@@ -11,6 +11,14 @@
 | Clinical Data Repository (CDR), CIHP | Public site describes a repository spanning 150+ facilities | Login/access restricted; dataset availability, governance, provenance and permission for this project unverified | Explore only through a formal institutional partnership and data agreement |
 | ESUTH dataset referenced in prior repository provenance work | A 2023 study was identified | Dataset not accessible to the project; cohort definition, site metadata and permissions not verified | Pending direct author/institutional enquiry |
 
+
+| Nigeria DHS 2023–24 microdata | National household survey with project-specific access requests; published 2026 analysis uses blood-sugar screening, self-reported diagnosis and treatment indicators among adults aged 15–49 | Useful for population care-cascade context, not a measured-biomarker hospital diagnostic cohort or site-held-out model validation | Request only for contextual epidemiology |
+| FMoH HPPDM/PDM platform | Official FMoH DHPRS inventory of projects, datasets and stakeholders; approved research-user registration required for downloads | Formal discovery route; no specific qualifying diabetes dataset confirmed | Register and search NCD/diabetes inventory |
+| CIHP Clinical Data Repository | Public site describes a repository spanning 150+ facilities; access requires account | Facility coverage and diabetes variables, provenance, ethics and access conditions not independently verified | Institutional enquiry only |
+| Sule Lamido University HISCDR | Public page describes a TETFund-supported clinical data repository | Potential data infrastructure; no diabetes cohort or external access conditions confirmed | Enquiry only |
+| DataLens Africa African Patient EHR Dataset | Public page describes Nigeria/Ghana episodes but labels the dataset synthetic/seed-labelled and commercial | Not authentic patient-level external validation | Exclude from clinical validation |
+| Zenodo 10.5281/zenodo.19084146 (Turkey EHR diabetes) | Public description claims retrospective data from 30 Istanbul healthcare centres and ethics approval | Possible non-Nigerian transportability comparator; not Nigerian validation; raw file/rights need verification | Optional comparator after file and licence review |
+
 ## Verification checklist for any proposed dataset
 
 Before accepting a dataset, obtain and archive in the institution's controlled records:
