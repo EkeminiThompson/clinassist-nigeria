@@ -20,7 +20,7 @@
 | Subgroup metrics | Completed | Run 42472051266 produced 1,638 rows; sparse strata retain denominators and suppress unstable estimates. See `docs/paper1_subgroup_audit_results.md`. |
 | Paired-bootstrap intervals | Completed | 819 paired comparisons; 609 eligible intervals; 210 sparse comparisons suppressed. All successful rows had >=900 valid draws and finite ordered intervals. |
 | Calibration plots | Provisional | Descriptive eight-quantile-bin curves generated for reference and combined-severe scenarios; no confidence bands. Final uncertainty-aware calibration reporting remains outstanding. |
-| Figures | Provisional | Five benchmark figures plus three calibration plots generated locally from verified artifact outputs. Final journal styling, figure-source scripts and repository/supplementary inclusion remain pending. |
+| Figures | Provisional | Five benchmark figures plus three calibration plots generated locally. Reproducible plotting script is committed at `ml/experiments/plot_calibration_curves.py`; optional dependency is in `ml/requirements-visualization.txt`. Final journal styling and inclusion of figure files/supplement remain pending. |
 | Tables | Drafted | Baseline, paired AUROC deltas and combined-severe calibration tables included. Reconcile after final audit. |
 | Discussion | Drafted | Updated with subgroup results and calibration limitations; revisit after supervisor review. |
 | Limitations | Drafted | Explicitly states no Nigerian cohort, no prospective validation, five overlapping split seeds and no clinical utility evaluation. |
