@@ -1,34 +1,101 @@
 name: CI
-
 on:
   push:
-    branches: [main]
+    branches: [main, feat/clinassist-full-stack-hardening]
   pull_request:
     branches: [main]
-
+  workflow_dispatch:
+concurrency:
+  group: clinassist-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 jobs:
-  test-backend:
+  backend:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install dependencies
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: python -m pip install --upgrade pip && pip install -r backend/requirements.txt
+      - run: PYTHONPATH=$PWD DATABASE_URL=sqlite:///./ci.db SECRET_KEY=ci-only-secret-key-not-for-deployment-123456 alembic upgrade head
+      - run: PYTHONPATH=$PWD pytest tests/ -v --tb=short
+      - run: PYTHONPATH=$PWD SECRET_KEY=ci-only-secret-key-not-for-deployment-123456 python -c "from backend.app.main import app; print(app.title)"
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm install
+      - run: npm run build
+  research-benchmarks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install reproducible research dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-          pip install pytest
-
-      - name: Run unit tests
+      - name: Retrieve and validate public benchmark
+        run: PYTHONPATH=$PWD python -m ml.datasets.download_pima
+      - name: Run repeated synthetic-shift experiment
+        run: PYTHONPATH=$PWD python -m ml.experiments.run_shift_study --repeats 5
+      - name: Run TreeSHAP explanation stability experiment
+        run: PYTHONPATH=$PWD python -m ml.experiments.run_explanation_stability --seed 42 --n-explain 100
+      - name: Run subgroup and paired-bootstrap statistical audit
+        timeout-minutes: 25
         run: |
-          export PYTHONPATH=$PWD
-          pytest tests/ -v --tb=short
+          PYTHONPATH=$PWD python -m ml.experiments.run_subgroup_statistical_audit --bootstrap 1000 --seed 2026
+          python - <<'PY'
+          import pandas as pd
+          from pathlib import Path
 
-      - name: Check import of prediction service
-        run: |
-          export PYTHONPATH=$PWD
-          python -c "from backend.app.services.prediction import risk_category; assert risk_category(0.1)=='low'"
+          root = Path("ml/artifacts/experiments")
+          metrics_path = root / "subgroup_metrics.csv"
+          bootstrap_path = root / "subgroup_paired_bootstrap.csv"
+          assert metrics_path.is_file() and metrics_path.stat().st_size > 0
+          assert bootstrap_path.is_file() and bootstrap_path.stat().st_size > 0
+
+          metrics = pd.read_csv(metrics_path)
+          bootstrap = pd.read_csv(bootstrap_path)
+          assert not metrics.empty and not bootstrap.empty
+          assert {"subgroup_type", "subgroup", "seed", "model", "shift_scenario",
+                  "adaptation", "n", "events", "eligible_for_metrics"} <= set(metrics.columns)
+          assert {"subgroup_type", "subgroup", "seed", "model", "shift_scenario",
+                  "n", "events", "valid_replicates", "status",
+                  "auroc_ci_lower", "auroc_ci_upper", "auprc_ci_lower",
+                  "auprc_ci_upper", "brier_ci_lower", "brier_ci_upper"} <= set(bootstrap.columns)
+          assert set(bootstrap["status"]) <= {"ok", "insufficient subgroup events"}
+          successful = bootstrap[bootstrap["status"] == "ok"]
+          assert (successful["valid_replicates"] >= 900).all()
+          assert successful[["auroc_ci_lower", "auroc_ci_upper", "auprc_ci_lower",
+                             "auprc_ci_upper", "brier_ci_lower", "brier_ci_upper"]].notna().all().all()
+          assert (bootstrap["n"] >= 0).all()
+          assert (bootstrap["events"] <= bootstrap["n"]).all()
+          assert (metrics["events"] <= metrics["n"]).all()
+          print({"metric_rows": len(metrics), "bootstrap_rows": len(bootstrap),
+                 "successful_intervals": len(successful),
+                 "explicitly_suppressed_sparse_rows": int((bootstrap["status"] == "insufficient subgroup events").sum())})
+          PY
+      - name: Upload benchmark, predictions, and analysis outputs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clinassist-research-results
+          path: |
+            ml/datasets/pima_manifest.json
+            ml/artifacts/experiments/
+          if-no-files-found: warn
+          retention-days: 90

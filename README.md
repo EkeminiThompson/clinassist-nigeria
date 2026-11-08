@@ -1,79 +1,41 @@
 # ClinAssist Nigeria
 
-**Research title:** An Explainable, Uncertainty-Aware and Offline-Capable Domain Adaptation Framework for Multi-Hospital Clinical Decision Support in Resource-Constrained Healthcare Settings.
+Research prototype for explainable, uncertainty-aware and offline-capable clinical decision support under resource constraints.
 
-**Repository:** private – EkeminiThompson/clinassist-nigeria  
-**Status:** Active research & engineering (Phase 2–3)
+## Data integrity
+The Mendeley deposit described as UITH + General Hospital Offa was found to repackage public Pima Indians Diabetes data without hospital identifiers. ESUTH research data remain inaccessible. The current model is a **public benchmark only**. Controlled synthetic shifts are not Nigerian external validation. See docs/dataset_provenance.md.
 
-## Important Data Statement
-
-The Mendeley deposit previously considered as “UITH + General Hospital Offa” was independently inspected and found to be a re-packaging of the public **Pima Indians Diabetes** dataset. It contains no hospital identifiers and cannot support true cross-hospital domain-adaptation claims for Nigerian sites.
-
-The original ESUTH research dataset associated with earlier work remains inaccessible.
-
-**Current modelling therefore uses the public Pima dataset strictly as a methodological benchmark.** All results are labelled accordingly. The software architecture and experimental pipeline are designed so that verified multi-site Nigerian cohorts can be plugged in when they become available.
-
-See `docs/dataset_provenance.md` and `docs/research_gap.md` for the full record.
-
-## Research Objectives
-
-1. Develop and evaluate domain-adaptation methods suitable for small tabular clinical datasets under distribution shift.
-2. Integrate calibrated uncertainty quantification and selective prediction (abstention when uncertainty is high).
-3. Quantify explanation stability (SHAP) under controlled shift.
-4. Investigate missing-data robustness.
-5. Deliver an offline-capable clinical decision support interface suitable for Nigerian teaching-hospital infrastructure constraints.
-
-## Architecture (high-level)
-
-```
-clinassist-nigeria/
-├── backend/          # FastAPI, Pydantic, SQLAlchemy, ML inference layer
-├── frontend/         # React + TypeScript + Ant Design + PWA
-├── ml/
-│   ├── preprocessing/
-│   ├── domain_adaptation/   # CORAL and related methods
-│   ├── uncertainty/         # Bootstrap & selective prediction
-│   ├── explainability/
-│   ├── evaluation/
-│   ├── experiments/         # Reproducible experiment scripts
-│   └── artifacts/           # Versioned experiment outputs (no patient data)
-├── docs/             # Research methodology, governance, model cards
-└── tests/
-```
-
-## Quick Start (development)
-
+## Backend (Python 3.11 recommended)
 ```bash
-# Backend
-cd backend
-python -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+pip install -r backend/requirements.txt
+export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+export DATABASE_URL="sqlite:///./clinassist.db"
+export PYTHONPATH="$PWD"
+alembic upgrade head
+uvicorn backend.app.main:app --reload
+```
+Create the first admin after migrations: set ADMIN_EMAIL, ADMIN_NAME and ADMIN_PASSWORD (12+ characters), then run `python -m backend.scripts.create_admin`.
 
-# Frontend (once scaffolded)
+## Frontend
+```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
+The prediction workspace exposes logistic regression, Random Forest and XGBoost. The benchmark CSV is fetched and checksum-manifested with `PYTHONPATH=. python -m ml.datasets.download_pima`.
 
-## Reproducible Baseline Experiments
-
+## Research experiments
 ```bash
-cd ml
-python -m experiments.run_baselines
+PYTHONPATH=. python -m ml.experiments.run_shift_study --repeats 5
+PYTHONPATH=. python -m ml.experiments.run_explanation_stability --seed 42 --n-explain 100
+PYTHONPATH=. python -m ml.experiments.run_subgroup_statistical_audit --bootstrap 1000 --seed 2026
 ```
+These are controlled public-benchmark studies, not external validation. The shift study reports calibration, selective metrics and paired CORAL deltas; the explanation study measures local TreeSHAP rank stability; the audit reports descriptive age/BMI strata and paired within-split bootstrap intervals. Subgroups are exploratory and do not establish Nigerian fairness. Outputs go to `ml/artifacts/experiments/` and should be archived with the generated Pima manifest. GitHub Actions also runs all three scripts and uploads a `clinassist-research-results` artifact.
 
-Results are written to `ml/artifacts/experiments/` with full data-source provenance.
+Development API docs: http://localhost:8000/api/docs (disabled in production).
 
-## Ethics & Intended Use
-
-- The system is intended to **support** qualified healthcare professionals.
-- It does **not** provide autonomous diagnosis or treatment recommendations.
-- No identifiable patient data are stored in the repository.
-- All experimental claims are restricted to the exact data and protocol used.
-
----
-
-*Principal investigator / lead engineer: Ekemini Thompson*  
-*This is a living research repository. Claims evolve only with evidence.*
+## Validation and ethics
+No Nigerian hospital validation is claimed. Preprocessing is fitted on source training data only; target labels are not used for CORAL adaptation. SHAP is not causal. Clinical deployment requires ethics approval, local calibration, prospective workflow evaluation and independent external validation.

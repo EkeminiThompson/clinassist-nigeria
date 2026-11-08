@@ -6,6 +6,9 @@ import sys
 from pathlib import Path
 
 import pytest
+from backend.app.services.prediction import DATA_PATH
+
+requires_benchmark_data = pytest.mark.skipif(not DATA_PATH.exists(), reason='Pima benchmark CSV is not distributed in this repository; add the verified dataset locally to run inference tests.')
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -14,11 +17,12 @@ from backend.app.services.prediction import predict, risk_category
 
 
 def test_risk_category():
-    assert risk_category(0.1) == "low"
-    assert risk_category(0.45) == "moderate"
-    assert risk_category(0.8) == "high"
+    assert risk_category(0.1) == "not_clinically_calibrated"
+    assert risk_category(0.45) == "not_clinically_calibrated"
+    assert risk_category(0.8) == "not_clinically_calibrated"
 
 
+@requires_benchmark_data
 def test_predict_high_risk_case():
     features = {
         "Pregnancies": 6,
@@ -33,7 +37,7 @@ def test_predict_high_risk_case():
     result = predict(features)
     assert "probability" in result
     assert 0.0 <= result["probability"] <= 1.0
-    assert result["risk_category"] in ("low", "moderate", "high")
+    assert result["risk_category"] == "not_clinically_calibrated"
     assert result["model_version"]
     assert "Pima" in result["data_source_note"]
     assert result["feature_contributions"] is not None
@@ -41,6 +45,7 @@ def test_predict_high_risk_case():
     assert result["uncertainty"] is not None
 
 
+@requires_benchmark_data
 def test_predict_low_risk_case():
     features = {
         "Pregnancies": 1,

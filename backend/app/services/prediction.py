@@ -1,150 +1,78 @@
-"""
-Prediction service with uncertainty and coefficient-based explanations.
-Trained on public Pima benchmark only – clearly labelled.
-"""
-
 from __future__ import annotations
-
-import logging
-import sys
+import logging,sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-import joblib
-import numpy as np
-import pandas as pd
+from typing import Any
+import joblib,numpy as np,pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
-
-_ROOT = Path(__file__).resolve().parents[3]
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
-
-from ml.preprocessing.pipeline import (  # noqa: E402
-    FEATURE_COLUMNS,
-    build_preprocessing_pipeline,
-    load_pima_benchmark,
-)
-from ml.uncertainty.selective import entropy_uncertainty  # noqa: E402
-
-logger = logging.getLogger(__name__)
-
-DATA_PATH = _ROOT / "ml" / "datasets" / "diabetes_dataset.csv"
-MODEL_DIR = _ROOT / "ml" / "artifacts" / "models"
-MODEL_DIR.mkdir(parents=True, exist_ok=True)
-MODEL_PATH = MODEL_DIR / "baseline_logistic.joblib"
-
-MODEL_VERSION = "baseline-lr-0.1.0"
-DATA_SOURCE_NOTE = (
-    "Model trained on the public Pima Indians Diabetes dataset "
-    "(methodological benchmark only). Not Nigerian multi-hospital data. "
-    "See docs/dataset_provenance.md."
-)
-
-
-def _train_and_persist_baseline() -> Pipeline:
-    X, y = load_pima_benchmark(str(DATA_PATH))
-    pipe = Pipeline(
-        [
-            ("preprocess", build_preprocessing_pipeline(impute_strategy="median", scale=True)),
-            (
-                "clf",
-                LogisticRegression(
-                    max_iter=1000, C=1.0, class_weight="balanced", random_state=42
-                ),
-            ),
-        ]
-    )
-    pipe.fit(X, y)
-    joblib.dump(pipe, MODEL_PATH)
-    logger.info("Baseline model trained and saved to %s", MODEL_PATH)
-    return pipe
-
-
-def load_model() -> Pipeline:
-    if MODEL_PATH.exists():
-        return joblib.load(MODEL_PATH)
-    return _train_and_persist_baseline()
-
-
-def risk_category(prob: float) -> str:
-    if prob < 0.3:
-        return "low"
-    if prob < 0.6:
-        return "moderate"
-    return "high"
-
-
-def compute_shap_style_contributions(
-    model: Pipeline, features: Dict[str, float]
-) -> List[Dict[str, Any]]:
-    clf = model.named_steps["clf"]
-    preprocess = model.named_steps["preprocess"]
-    row = pd.DataFrame([features])[FEATURE_COLUMNS]
-    X_scaled = preprocess.transform(row)
-    if hasattr(X_scaled, "values"):
-        X_scaled = X_scaled.values
-    X_scaled = np.asarray(X_scaled).ravel()
-    coefs = clf.coef_.ravel()
-    contributions = []
-    for i, name in enumerate(FEATURE_COLUMNS):
-        contrib = float(coefs[i] * X_scaled[i])
-        contributions.append(
-            {
-                "feature": name,
-                "value": float(features[name]),
-                "contribution": contrib,
-                "direction": "increases_risk" if contrib > 0 else "decreases_risk",
-            }
-        )
-    contributions.sort(key=lambda x: abs(x["contribution"]), reverse=True)
-    return contributions
-
-
-def predict(
-    features: Dict[str, float],
-    return_explanation: bool = True,
-    return_uncertainty: bool = True,
-    uncertainty_threshold: float = 0.5,
-) -> Dict[str, Any]:
-    model = load_model()
-    row = pd.DataFrame([features])[FEATURE_COLUMNS]
-    proba = float(model.predict_proba(row)[0, 1])
-    pred = int(proba >= 0.5)
-
-    uncertainty = None
-    abstain = False
-    if return_uncertainty:
-        uncertainty = float(entropy_uncertainty(np.array([proba]))[0])
-        abstain = uncertainty > uncertainty_threshold
-
-    contributions = None
-    if return_explanation:
-        contributions = compute_shap_style_contributions(model, features)
-
-    confidence_statement = (
-        "Model abstains due to high uncertainty – clinician review recommended."
-        if abstain
-        else f"Predicted probability of diabetes: {proba:.1%}. Risk category: {risk_category(proba)}."
-    )
-
-    limitations = [
-        "Trained on public Pima Indians Diabetes dataset (methodological benchmark).",
-        "Not validated on Nigerian multi-hospital data.",
-        "Statistical associations only – not causal explanations.",
-        "Missing or out-of-distribution values may reduce reliability.",
-    ]
-
-    return {
-        "model_version": MODEL_VERSION,
-        "data_source_note": DATA_SOURCE_NOTE,
-        "probability": proba,
-        "risk_category": risk_category(proba),
-        "prediction": pred if not abstain else -1,
-        "abstain": abstain,
-        "uncertainty": uncertainty,
-        "uncertainty_measure": "binary_entropy" if uncertainty is not None else None,
-        "confidence_statement": confidence_statement,
-        "feature_contributions": contributions,
-        "limitations": limitations,
-    }
+from xgboost import XGBClassifier
+ROOT=Path(__file__).resolve().parents[3]
+if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
+from ml.preprocessing.pipeline import FEATURE_COLUMNS,build_preprocessing_pipeline,load_pima_benchmark
+from ml.uncertainty.selective import entropy_uncertainty
+log=logging.getLogger(__name__)
+DATA=ROOT/"ml/datasets/diabetes_dataset.csv"
+DATA_PATH=DATA
+MODEL_DIR=ROOT/"ml/artifacts/models"
+MODEL_DIR.mkdir(parents=True,exist_ok=True)
+MODEL_NAMES=("logistic_regression","random_forest","xgboost")
+def build_classifier(model_name:str,seed:int=42):
+    if model_name=="logistic_regression":
+        return LogisticRegression(max_iter=1500,class_weight="balanced",random_state=seed)
+    if model_name=="random_forest":
+        return RandomForestClassifier(n_estimators=250,max_depth=6,min_samples_leaf=3,class_weight="balanced",n_jobs=-1,random_state=seed)
+    if model_name=="xgboost":
+        return XGBClassifier(n_estimators=180,max_depth=3,learning_rate=.04,subsample=.8,colsample_bytree=.8,reg_lambda=2,random_state=seed,eval_metric="logloss",verbosity=0)
+    raise ValueError(f"Unsupported model_name. Choose one of: {', '.join(MODEL_NAMES)}")
+def load_model(model_name:str="logistic_regression"):
+    classifier=build_classifier(model_name)
+    model_path=MODEL_DIR/f"{model_name}_v0_3_0.joblib"
+    if model_path.exists(): return joblib.load(model_path)
+    X,y=load_pima_benchmark(str(DATA))
+    model=Pipeline([("preprocess",build_preprocessing_pipeline()),("clf",classifier)])
+    model.fit(X,y);joblib.dump(model,model_path)
+    return model
+def risk_category(probability:float)->str:
+    # No clinical cut-points have been validated for this non-Nigerian benchmark.
+    return "not_clinically_calibrated"
+def compute_shap_contributions(model,features):
+    X,_=load_pima_benchmark(str(DATA))
+    preprocess=model.named_steps["preprocess"];estimator=model.named_steps["clf"]
+    background=np.asarray(preprocess.transform(X.sample(min(100,len(X)),random_state=42)))
+    row=np.asarray(preprocess.transform(pd.DataFrame([features])[FEATURE_COLUMNS]))
+    try:
+        if hasattr(estimator,"feature_importances_"):
+            from ml.explainability.tree_shap import tree_shap_values
+            values=tree_shap_values(estimator,background,row,FEATURE_COLUMNS)[0]
+            method="TreeSHAP"
+        else:
+            import shap
+            explanation=shap.Explainer(estimator,shap.maskers.Independent(background,max_samples=min(100,len(background))))(row)
+            values=np.asarray(explanation.values)
+            if values.ndim==3: values=values[...,-1]
+            values=values.reshape(-1)
+            method="SHAP"
+        if len(values)!=len(FEATURE_COLUMNS): raise ValueError("Unexpected SHAP dimensions")
+    except Exception as exc:
+        if not hasattr(estimator,"coef_"):
+            log.exception("TreeSHAP unavailable for selected model")
+            raise RuntimeError("A faithful local SHAP explanation could not be computed for this tree model.") from exc
+        log.exception("SHAP failed; using explicitly labelled coefficient fallback: %s",exc)
+        transformed=np.asarray(preprocess.transform(pd.DataFrame([features])[FEATURE_COLUMNS])).ravel()
+        values=estimator.coef_.ravel()*transformed
+        method="coefficient_fallback_not_SHAP"
+    return [{"feature":name,"value":float(features[name]),"contribution":float(value),
+        "direction":"increases_risk" if value>0 else "decreases_risk","method":method}
+        for name,value in sorted(zip(FEATURE_COLUMNS,values),key=lambda pair:abs(pair[1]),reverse=True)]
+def predict(features:dict[str,float],return_explanation=True,return_uncertainty=True,uncertainty_threshold=.5,model_name="logistic_regression")->dict[str,Any]:
+    model=load_model(model_name)
+    probability=float(model.predict_proba(pd.DataFrame([features])[FEATURE_COLUMNS])[0,1])
+    uncertainty=float(entropy_uncertainty(np.array([probability]))[0]) if return_uncertainty else None
+    abstain=bool(uncertainty is not None and uncertainty>uncertainty_threshold)
+    return {"model_version":f"{model_name}-0.3.0","data_source_note":"Public Pima Indians Diabetes dataset (methodological benchmark only), not Nigerian hospital data.",
+        "probability":probability,"risk_category":risk_category(probability),"prediction":-1 if abstain else int(probability>=.5),
+        "abstain":abstain,"uncertainty":uncertainty,"uncertainty_measure":"binary_entropy_nats" if uncertainty is not None else None,
+        "confidence_statement":"Experimental benchmark output only; not calibrated or intended for clinical decisions. Entropy-based abstention is not a clinical safety guarantee.",
+        "feature_contributions":compute_shap_contributions(model,features) if return_explanation else None,
+        "limitations":["Pima public benchmark only; no Nigerian external validation.","Entropy is not a calibrated clinical confidence interval.","SHAP is model behaviour, not causality."]}
