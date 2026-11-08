@@ -55,10 +55,40 @@ jobs:
       - name: Run TreeSHAP explanation stability experiment
         run: PYTHONPATH=$PWD python -m ml.experiments.run_explanation_stability --seed 42 --n-explain 100
       - name: Run subgroup and paired-bootstrap statistical audit
+        timeout-minutes: 25
         run: |
           PYTHONPATH=$PWD python -m ml.experiments.run_subgroup_statistical_audit --bootstrap 1000 --seed 2026
-          test -s ml/artifacts/experiments/subgroup_metrics.csv
-          test -s ml/artifacts/experiments/subgroup_paired_bootstrap.csv
+          python - <<'PY'
+          import pandas as pd
+          from pathlib import Path
+
+          root = Path("ml/artifacts/experiments")
+          metrics_path = root / "subgroup_metrics.csv"
+          bootstrap_path = root / "subgroup_paired_bootstrap.csv"
+          assert metrics_path.is_file() and metrics_path.stat().st_size > 0
+          assert bootstrap_path.is_file() and bootstrap_path.stat().st_size > 0
+
+          metrics = pd.read_csv(metrics_path)
+          bootstrap = pd.read_csv(bootstrap_path)
+          assert not metrics.empty and not bootstrap.empty
+          assert {"subgroup_type", "subgroup", "seed", "model", "shift_scenario",
+                  "adaptation", "n", "events", "eligible_for_metrics"} <= set(metrics.columns)
+          assert {"subgroup_type", "subgroup", "seed", "model", "shift_scenario",
+                  "n", "events", "valid_replicates", "status",
+                  "auroc_ci_lower", "auroc_ci_upper", "auprc_ci_lower",
+                  "auprc_ci_upper", "brier_ci_lower", "brier_ci_upper"} <= set(bootstrap.columns)
+          assert set(bootstrap["status"]) <= {"ok", "insufficient subgroup events"}
+          successful = bootstrap[bootstrap["status"] == "ok"]
+          assert (successful["valid_replicates"] >= 900).all()
+          assert successful[["auroc_ci_lower", "auroc_ci_upper", "auprc_ci_lower",
+                             "auprc_ci_upper", "brier_ci_lower", "brier_ci_upper"]].notna().all().all()
+          assert (bootstrap["n"] >= 0).all()
+          assert (bootstrap["events"] <= bootstrap["n"]).all()
+          assert (metrics["events"] <= metrics["n"]).all()
+          print({"metric_rows": len(metrics), "bootstrap_rows": len(bootstrap),
+                 "successful_intervals": len(successful),
+                 "explicitly_suppressed_sparse_rows": int((bootstrap["status"] == "insufficient subgroup events").sum())})
+          PY
       - name: Upload benchmark, predictions, and analysis outputs
         if: always()
         uses: actions/upload-artifact@v4
