@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from ml.evaluation.metrics import (compute_discrimination_metrics,expected_calibration_error,
-    full_evaluation,selective_prediction_metrics,risk_coverage_curve,bootstrap_metric_intervals)
+    full_evaluation,selective_prediction_metrics,risk_coverage_curve,bootstrap_metric_intervals,calibration_intercept_slope)
 
 def test_ece_includes_probability_one():
     assert expected_calibration_error([1,0],[1.0,0.0])==0.0
@@ -26,3 +26,10 @@ def test_bootstrap_intervals_reproducible():
     a=bootstrap_metric_intervals([0,1,0,1],[.1,.8,.3,.7],n_bootstrap=100,random_state=9)
     b=bootstrap_metric_intervals([0,1,0,1],[.1,.8,.3,.7],n_bootstrap=100,random_state=9)
     assert a==b
+
+
+def test_calibration_intercept_slope_returns_finite_diagnostics():
+    out=calibration_intercept_slope([0,1,0,1,0,1,0,1],[.1,.8,.2,.7,.3,.9,.15,.85])
+    assert np.isfinite(out['calibration_intercept_in_large'])
+    assert np.isfinite(out['calibration_intercept'])
+    assert np.isfinite(out['calibration_slope'])
