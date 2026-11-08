@@ -34,7 +34,8 @@ def load_model(model_name:str="logistic_regression"):
     model.fit(X,y);joblib.dump(model,model_path)
     return model
 def risk_category(probability:float)->str:
-    return "low" if probability<.3 else "moderate" if probability<.6 else "high"
+    # No clinical cut-points have been validated for this non-Nigerian benchmark.
+    return "not_clinically_calibrated"
 def compute_shap_contributions(model,features):
     X,_=load_pima_benchmark(str(DATA))
     preprocess=model.named_steps["preprocess"];estimator=model.named_steps["clf"]
@@ -72,6 +73,6 @@ def predict(features:dict[str,float],return_explanation=True,return_uncertainty=
     return {"model_version":f"{model_name}-0.3.0","data_source_note":"Public Pima Indians Diabetes dataset (methodological benchmark only), not Nigerian hospital data.",
         "probability":probability,"risk_category":risk_category(probability),"prediction":-1 if abstain else int(probability>=.5),
         "abstain":abstain,"uncertainty":uncertainty,"uncertainty_measure":"binary_entropy_nats" if uncertainty is not None else None,
-        "confidence_statement":"Abstain: clinician review required." if abstain else f"Benchmark model score: {probability:.1%}; not a diagnosis.",
+        "confidence_statement":"Experimental benchmark output only; not calibrated or intended for clinical decisions. Entropy-based abstention is not a clinical safety guarantee.",
         "feature_contributions":compute_shap_contributions(model,features) if return_explanation else None,
         "limitations":["Pima public benchmark only; no Nigerian external validation.","Entropy is not a calibrated clinical confidence interval.","SHAP is model behaviour, not causality."]}
