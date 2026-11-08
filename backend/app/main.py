@@ -12,7 +12,14 @@ from backend.app.api.auth import router as auth_router
 from backend.app.api.sync import router as sync_router
 from backend.app.core.config import settings
 from backend.app.limiter import limiter
-app=FastAPI(title="ClinAssist Nigeria API",version="0.3.0",docs_url="/api/docs")
+production=settings.environment.lower()=="production"
+app=FastAPI(
+    title="ClinAssist Nigeria API",
+    version="0.3.0",
+    docs_url=None if production else "/api/docs",
+    redoc_url=None if production else "/api/redoc",
+    openapi_url=None if production else "/api/openapi.json",
+)
 app.state.limiter=limiter
 app.add_exception_handler(RateLimitExceeded,_rate_limit_exceeded_handler)
 app.add_middleware(CORSMiddleware,allow_origins=settings.allowed_origins,allow_credentials=True,allow_methods=["GET","POST","PATCH"],allow_headers=["Authorization","Content-Type"])
