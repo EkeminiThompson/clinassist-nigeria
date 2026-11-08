@@ -10,6 +10,7 @@ if str(ROOT) not in sys.path:sys.path.insert(0,str(ROOT))
 from ml.preprocessing.pipeline import FEATURE_COLUMNS,build_preprocessing_pipeline,load_pima_benchmark
 from ml.uncertainty.selective import entropy_uncertainty
 log=logging.getLogger(__name__);DATA=ROOT/'ml/datasets/diabetes_dataset.csv';MODEL_DIR=ROOT/'ml/artifacts/models';MODEL_DIR.mkdir(parents=True,exist_ok=True);MODEL=MODEL_DIR/'baseline_logistic.joblib'
+DATA_PATH=DATA
 def load_model():
  if MODEL.exists():return joblib.load(MODEL)
  X,y=load_pima_benchmark(str(DATA));m=Pipeline([('preprocess',build_preprocessing_pipeline()),('clf',LogisticRegression(max_iter=1000,class_weight='balanced',random_state=42))]);m.fit(X,y);joblib.dump(m,MODEL);return m
