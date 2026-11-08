@@ -45,6 +45,14 @@ Required metadata include site code, calendar period, measurement units, assay/d
 
 No data will be extracted, transferred or analysed until the participating institution(s) provide written permission, the relevant registered HREC(s) issue approval, the lawful basis and consent/waiver are documented, a DPIA is completed with the DPO, and a data-use/sharing agreement is executed. Direct identifiers and re-identification keys remain at the source hospital. Analysis will occur in an institution-approved secure environment; no patient-level data will be committed to GitHub or transferred to public cloud workspaces.
 
+## Initial Nigerian institutional pathway
+
+Federal Medical Centre Bida is the proposed first development-site approach because its official Centre for Health & Allied Researches (CHAR) describes a multidisciplinary research collaboration structure. The published CHAR contact is Dr A. O. Adekanye, Director, CHAR FMC Bida (08033840426). The NHREC public directory lists an FMC Bida HREC contact (Sunday Erinle; 08030664239; surubomi@gmail.com); verify current committee contacts and review route with the hospital before submission.
+
+Potential independent validation sites to approach after the development-site PI is secured include NAUTH Nnewi and UNTH Enugu. Their current HREC contacts are listed in the NHREC registered-committee directory, but those HREC contacts are not substitutes for a clinical PI or hospital data custodian. UITH may also be considered only after the previously identified Pima-duplicate Mendeley deposit is excluded and a genuine site cohort is independently verified.
+
+The FMoH Health Partners' Projects & Data Mapping Platform is a parallel route for identifying partner-held datasets. A project-specific approved research-user account is required; no diabetes cohort is assumed available.
+
 ## Requested collaboration
 
 We seek a named clinical PI/co-investigator, access to the hospital research office and HREC process, a data custodian, and a feasibility discussion about a de-identified retrospective cohort. The first meeting should determine whether the cohort, variables, outcome definitions, ethics route and data governance requirements are feasible. No commitment to release data is assumed.
