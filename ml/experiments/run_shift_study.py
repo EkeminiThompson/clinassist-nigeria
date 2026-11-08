@@ -45,6 +45,14 @@ def _calibrated(estimator,seed):
     # Calibration folds are source-only; no target labels are accessed.
     return CalibratedClassifierCV(estimator=clone(estimator),method="sigmoid",cv=3)
 
+def _json_safe(value):
+    if isinstance(value,dict): return {str(k):_json_safe(v) for k,v in value.items()}
+    if isinstance(value,(list,tuple)): return [_json_safe(v) for v in value]
+    if isinstance(value,(np.integer,)): return int(value)
+    if isinstance(value,(np.floating,float)):
+        return float(value) if np.isfinite(value) else None
+    return value
+
 def run_study(repeats=5,models=("logistic_regression","random_forest","hist_gradient_boosting"),missing_rate=0.1):
     X,y=load_pima_benchmark(str(DATA)); X=X[FEATURE_COLUMNS].to_numpy(dtype=float); y=y.to_numpy(dtype=int)
     rows=[]; predictions={}
@@ -73,7 +81,7 @@ def run_study(repeats=5,models=("logistic_regression","random_forest","hist_grad
     summary=frame.groupby(["model","scenario"]).agg({c:["mean","std"] for c in ["auroc","auprc","brier","ece","aurc","selective_auroc","selective_brier"]}).round(5)
     summary.to_csv(OUT/"synthetic_shift_summary.csv")
     artifact={"study":"controlled_synthetic_covariate_and_missingness_shift","data_source":"public Pima benchmark only","external_validation":False,"target_labels_used_for_adaptation":False,"target_covariates_used_for_adaptation":"CORAL scenario only","repeats":repeats,"models":list(models),"missing_rate":missing_rate,"seed_range":[42,41+repeats],"results":rows,"summary_csv":"synthetic_shift_summary.csv","raw_runs_csv":"synthetic_shift_runs.csv"}
-    (OUT/"synthetic_shift_study.json").write_text(json.dumps(artifact,indent=2,allow_nan=False))
+    (OUT/"synthetic_shift_study.json").write_text(json.dumps(_json_safe(artifact),indent=2,allow_nan=False))
     return artifact
 
 if __name__=="__main__":
