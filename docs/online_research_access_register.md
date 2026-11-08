@@ -58,6 +58,12 @@ This is the strongest first approach because it is in Niger State and has an est
 - CHAR describes a multidisciplinary membership across consultants, resident doctors, nurses, health records, administration and laboratory staff, and states that it supports ethically approved research and collaborative research.
 - Ask CHAR to identify a consultant physician/endocrinologist or diabetes-clinic lead as clinical PI/co-investigator, plus a records/laboratory custodian and the institutional research approval route.
 
+**FMC Bida clinical pathway**
+- Internal Medicine official page confirms an Endocrinology unit within the department: https://fmcbida.gov.ng/internal-medicine/
+- Official specialty-clinic schedule lists a Gastro-Endocrine Clinic on Thursdays, 8:00 am–12:00 noon, and an NCD clinic on Tuesdays, 8:00 am–2:00 pm: https://fmcbida.gov.ng/specialty-clinic-days/ and https://fmcbida.gov.ng/family-specialty-medicine/
+- The official consultants directory lists Dr Olajide Olayode O. under Internal Medicine, with public contacts olajideolayode@gmail.com / o.olajide@fmcbida.org and 07031084451: https://fmcbida.gov.ng/our-doctors/. This listing does not identify an endocrinology subspecialty; ask CHAR or Internal Medicine to route the request to the appropriate endocrine consultant rather than assuming this person is the PI.
+- The Health Information Management page confirms a department responsible for health-record initiation, compilation, storage, retrieval and dissemination: https://fmcbida.gov.ng/health-information-management/. Ask for the authorised data custodian only after a PI is identified.
+
 **FMC Bida HREC**
 - NHREC directory entry: contact listed as Sunday Erinle.
 - Telephone: 08030664239.
