@@ -14,4 +14,4 @@ app.include_router(auth_router);app.include_router(predict_router);app.include_r
 @app.get("/health")
 def health(): return {"status":"ok","service":"clinassist-nigeria","mode":"research","disclaimer":"Not autonomous diagnosis or treatment."}
 @app.get("/api/v1/model/info")
-def info(): return {"model_version":"baseline-lr-0.2.0","data_source_note":"Public Pima benchmark only; not Nigerian multi-hospital validation.","supports_uncertainty":True,"supports_explainability":True,"offline_capable":True}
+def info(): return {"model_version":"baseline-lr-0.2.0","data_source_note":"Public Pima benchmark only; not Nigerian multi-hospital validation.","supports_uncertainty":True,"supports_explainability":True,"explanation_methods":{"logistic_regression":"SHAP with labelled coefficient fallback","random_forest":"TreeSHAP","xgboost":"TreeSHAP"},"supported_models":["logistic_regression","random_forest","xgboost"],"uncertainty_note":"Binary entropy is not a calibrated confidence interval.","offline_capable":True}

@@ -1,7 +1,7 @@
 # Statistical analysis plan
 
 ## Scope and data boundary
-The available dataset is the historical Pima Indians Diabetes benchmark (768 observations, eight predictors), not a Nigerian cohort. The protocol evaluates methodological behaviour under explicitly controlled synthetic shifts. No result from this protocol is external clinical validation or evidence of transportability to Nigerian patients.
+The available dataset is the historical Pima Indians Diabetes benchmark (768 observations, eight predictors), not a Nigerian cohort. This protocol evaluates methodological behaviour under explicitly controlled synthetic shifts. No result is external clinical validation or evidence of transportability to Nigerian patients.
 
 ## Research questions and hypotheses
 - **RQ1 / H1:** Does unsupervised CORAL adaptation change discrimination and calibration relative to source-only training under prespecified covariate and missingness shifts? No direction of benefit is assumed; negative transfer is a primary result to report.
@@ -10,11 +10,11 @@ The available dataset is the historical Pima Indians Diabetes benchmark (768 obs
 - **RQ4:** Can the software provide auditable, metadata-only offline receipt handling without storing clinical payloads in the queue?
 
 ## Experimental design
-Use repeated stratified 75/25 source/held-out splits with fixed, published seeds. Fit preprocessing on source-training rows only. Create the target stress-test covariates after splitting; never use held-out labels to fit preprocessing, CORAL, calibration, or model parameters. CORAL may use held-out target covariates as an explicitly transductive, unsupervised adaptation input. Held-out labels are used only for final evaluation.
+Use repeated stratified 75/25 source/held-out splits with fixed, published seeds. Fit preprocessing on source-training rows only. Create target stress-test covariates after splitting; never use held-out labels to fit preprocessing, CORAL, calibration or model parameters. CORAL may use held-out target covariates as an explicitly transductive, unsupervised adaptation input. Held-out labels are used only for final evaluation.
 
-The shift grid includes an unshifted reference, mild/severe covariate shifts, MCAR-like missingness, glucose-dependent MAR-like missingness in selected laboratory fields, and combined scenarios. These mechanisms are simplified stress tests, not claims about real hospital missingness processes.
+The shift grid includes an unshifted reference, mild/severe covariate shifts, MCAR-like missingness, glucose-dependent MAR-like missingness in selected laboratory fields, and combined scenarios. These are simplified stress tests, not claims about real hospital missingness processes.
 
-Compare logistic regression, random forest and histogram gradient boosting. Calibrate probability outputs using sigmoid calibration with source-training folds only. Report the calibration method and its limitations under target shift.
+Compare logistic regression, random forest and histogram gradient boosting. Calibrate probability outputs using sigmoid calibration with source-training folds only. Report the calibration method and limitations under target shift.
 
 ## Outcomes
 - Primary discrimination: area under the precision-recall curve (AUPRC), interpreted alongside prevalence.
@@ -25,7 +25,7 @@ Compare logistic regression, random forest and histogram gradient boosting. Cali
 - Systems: authentication/RBAC tests, migration tests, sync idempotency and rejection of clinical payload fields.
 
 ## Statistical reporting
-Report each split's results, the mean and standard deviation across repeated splits, and paired CORAL-minus-source-only differences by split. These repeated-split summaries describe sensitivity to split choice; they are not independent patient-level confidence intervals. Do not apply naive significance tests treating repeated splits as independent cohorts. For a confirmatory external study, prespecify site-level or temporal holdouts and use patient-level resampling that respects clustering.
+Report each split's metrics and held-out predictions, mean and standard deviation across repeated splits, and paired CORAL-minus-source-only differences by split. These repeated-split summaries describe split variability; they are not independent patient-level confidence intervals. Do not apply naive significance tests treating repeated splits as independent cohorts. A confirmatory external study must prespecify site-level or temporal holdouts and use patient-level resampling that respects clustering.
 
 ## Ablations
 1. Source-only versus CORAL.
@@ -36,7 +36,7 @@ Report each split's results, the mean and standard deviation across repeated spl
 6. TreeSHAP ranking stability across perturbation magnitudes.
 
 ## Reproducibility
-Record dataset version and SHA-256 manifest, feature schema, preprocessing configuration, split seeds, model hyperparameters, calibration folds, scenario definitions, software versions and raw per-split predictions/metrics. Do not publish aggregate headline results without the corresponding run artifacts.
+Record dataset version and SHA-256 manifest, feature schema, preprocessing configuration, split seeds, model hyperparameters, calibration folds, scenario definitions, software versions, raw per-split predictions and metrics. Do not publish aggregate headline results without corresponding run artifacts.
 
 ## Decision rules
 No single metric determines success. A method that improves AUROC while materially worsening calibration, AUPRC or retained-case safety is not declared superior. CORAL negative transfer must be reported. Thresholds must not be tuned on held-out target labels.

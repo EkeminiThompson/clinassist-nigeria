@@ -1,7 +1,7 @@
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
-import pytest
+import pytest\nfrom pydantic import ValidationError
 from backend.app.services.prediction import build_classifier,MODEL_NAMES
 from backend.app.schemas import PredictionRequest
 
@@ -19,4 +19,4 @@ def test_prediction_request_defaults_to_logistic_model():
 
 def test_prediction_request_rejects_unknown_model():
     payload={"features":{"Pregnancies":1,"Glucose":100,"BloodPressure":70,"SkinThickness":20,"Insulin":80,"BMI":25,"DiabetesPedigreeFunction":.4,"Age":35},"model_name":"svm"}
-    with pytest.raises(Exception): PredictionRequest(**payload)
+    with pytest.raises(ValidationError): PredictionRequest(**payload)

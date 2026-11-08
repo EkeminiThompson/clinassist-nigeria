@@ -12,7 +12,7 @@ def endpoint(req:PredictionRequest,db:Session=Depends(get_db),user:User=Depends(
     try:
         result=predict(req.features.model_dump(),req.return_explanation,req.return_uncertainty,req.uncertainty_threshold,model_name=req.model_name)
         if result.get("feature_contributions"): result["feature_contributions"]=[FeatureContribution(**item) for item in result["feature_contributions"]]
-        record_event(db,user,"prediction.completed","prediction",{"model_version":result["model_version"],"abstained":result["abstain"]})
+        record_event(db,user,"prediction.completed","prediction",{"model_version":result["model_version"],"model_name":req.model_name,"abstained":result["abstain"]})
         return PredictionResponse(**result)
     except ValueError as exc: raise HTTPException(422,str(exc))
     except Exception: raise HTTPException(500,"Prediction failed; check model availability and server logs.")

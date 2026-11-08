@@ -27,7 +27,7 @@ def build_classifier(model_name:str,seed:int=42):
     raise ValueError(f"Unsupported model_name. Choose one of: {', '.join(MODEL_NAMES)}")
 def load_model(model_name:str="logistic_regression"):
     classifier=build_classifier(model_name)
-    model_path=MODEL_DIR/f"{model_name}.joblib"
+    model_path=MODEL_DIR/f"{model_name}_v0_3_0.joblib"
     if model_path.exists(): return joblib.load(model_path)
     X,y=load_pima_benchmark(str(DATA))
     model=Pipeline([("preprocess",build_preprocessing_pipeline()),("clf",classifier)])

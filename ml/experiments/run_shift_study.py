@@ -85,7 +85,7 @@ def run_study(repeats=5,models=("logistic_regression","random_forest","hist_grad
                     rows.append({"seed":seed,"model":model_name,"shift_scenario":shift_name,"adaptation":adaptation,
                         "n_train":len(train_ix),"n_test":len(test_ix),**config,**metrics})
     frame=pd.DataFrame(rows);OUT.mkdir(parents=True,exist_ok=True)
-    frame.to_csv(OUT/"synthetic_shift_runs.csv",index=False)
+    frame.to_csv(OUT/"synthetic_shift_runs.csv",index=False)\n    pd.DataFrame(prediction_rows).to_csv(OUT/"synthetic_shift_predictions.csv",index=False)
     metric_names=["auroc","auprc","brier","ece","aurc","selective_auroc","selective_brier"]
     summary=frame.groupby(["model","shift_scenario","adaptation"])[metric_names].agg(["mean","std"]).round(5)
     summary.to_csv(OUT/"synthetic_shift_summary.csv")
@@ -100,7 +100,7 @@ def run_study(repeats=5,models=("logistic_regression","random_forest","hist_grad
         "external_validation":False,"target_labels_used_for_adaptation":False,"target_covariates_used_for_adaptation":"CORAL scenario only",
         "repeats":repeats,"models":list(models),"scenario_definitions":scenarios,"seed_range":[42,41+repeats],"results":rows,
         "summary_csv":"synthetic_shift_summary.csv","raw_runs_csv":"synthetic_shift_runs.csv",
-        "paired_differences_csv":"synthetic_shift_paired_differences.csv",
+        "paired_differences_csv":"synthetic_shift_paired_differences.csv","predictions_csv":"synthetic_shift_predictions.csv",
         "interpretation_note":"Mean and standard deviation across repeated random splits describe split variability, not independent external validation or patient-level confidence intervals."}
     (OUT/"synthetic_shift_study.json").write_text(json.dumps(_json_safe(artifact),indent=2,allow_nan=False))
     return artifact
