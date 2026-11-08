@@ -2,8 +2,20 @@
 ClinAssist Nigeria – FastAPI application entry point.
 """
 
+from __future__ import annotations
+
+import sys
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+# Ensure project root is on path for ml.* imports
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from backend.app.api.predict import router as predict_router
 
 app = FastAPI(
     title="ClinAssist Nigeria API",
@@ -25,6 +37,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(predict_router)
+
 
 @app.get("/health")
 def health_check():
@@ -43,7 +57,7 @@ def health_check():
 @app.get("/api/v1/model/info")
 def model_info():
     return {
-        "model_version": "baseline-0.1.0",
+        "model_version": "baseline-lr-0.1.0",
         "data_source_note": (
             "Current models are trained on the public Pima Indians Diabetes dataset "
             "used strictly as a methodological benchmark. See docs/dataset_provenance.md."
