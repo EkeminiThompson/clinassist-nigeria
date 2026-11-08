@@ -4,7 +4,7 @@ JWT bearer tokens have a configurable expiry. Passwords are hashed with Argon2. 
 
 Public registration now creates **viewer** accounts only. An administrator must explicitly grant clinician/researcher permissions after identity and professional-authorisation checks. Bootstrap the first administrator through backend/scripts/create_admin.py in a trusted deployment environment. Migration 0002 demotes existing clinician-role accounts created under the former public-registration behaviour; review and re-authorise legitimate clinical accounts through an administrator after migration.
 
-API documentation and OpenAPI routes are disabled when ENVIRONMENT=production. Keep TLS termination, secure headers, managed secrets, database encryption/backups, network restrictions and least-privilege service accounts in the deployment platform configuration.
+API documentation and OpenAPI routes are disabled when ENVIRONMENT=production. The prediction endpoint also returns HTTP 503 in production until Nigerian external validation and clinical governance are completed; this is an intentional release gate, not a deployment defect. Keep TLS termination, secure headers, managed secrets, database encryption/backups, network restrictions and least-privilege service accounts in the deployment platform configuration.
 
 Audit events cover registration, login, prediction completion, administrative role changes and sync receipt metadata. Do not log patient feature values, passwords or tokens. Define audit retention, access and tamper-resistance policies before deployment. MFA, secret rotation, monitoring, dependency scanning, independent penetration testing, backup/restore verification and incident-response exercises remain release blockers.
 
