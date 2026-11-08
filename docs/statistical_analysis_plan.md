@@ -21,7 +21,8 @@ Compare logistic regression, random forest and histogram gradient boosting. Cali
 - Secondary discrimination: AUROC, sensitivity, specificity, precision and F1 at the prespecified 0.5 threshold.
 - Calibration: Brier score, 10-bin expected calibration error (ECE), calibration-in-the-large intercept, and joint logistic calibration intercept/slope (ideal intercept 0, slope 1). Calibration plots should accompany the numeric metrics in a publication-ready analysis.
 - Selective prediction: risk-coverage curve, area under the risk-coverage curve (AURC), and retained-set metrics at 80% target coverage.
-- Explainability: local feature-rank stability using rank-biased overlap (p=0.9) at standardized perturbation SD 0.01, 0.05 and 0.10.\n- Exploratory subgroup analysis: age (<30, 30–49, 50+) and BMI (<18.5, 18.5–24.9, 25–29.9, >=30) strata, reporting sample count, event count, prevalence, discrimination and calibration. Invalid zero BMI values are excluded from BMI strata. The Pima benchmark contains only women of Pima heritage; sex/race subgroup fairness cannot be assessed.
+- Explainability: local feature-rank stability using rank-biased overlap (p=0.9) at standardized perturbation SD 0.01, 0.05 and 0.10.
+- Exploratory subgroup analysis: age (<30, 30–49, 50+) and BMI (<18.5, 18.5–24.9, 25–29.9, >=30) strata, reporting sample count, event count, prevalence, discrimination and calibration. Invalid zero BMI values are excluded from BMI strata. The Pima benchmark contains only women of Pima heritage; sex/race subgroup fairness cannot be assessed.
 - Systems: authentication/RBAC tests, migration tests, sync idempotency and rejection of clinical payload fields.
 
 ## Statistical reporting
@@ -39,7 +40,9 @@ Report each split's metrics and held-out predictions, mean and standard deviatio
 Record dataset version and SHA-256 manifest, feature schema, preprocessing configuration, split seeds, model hyperparameters, calibration folds, scenario definitions, software versions, raw per-split predictions and metrics. Do not publish aggregate headline results without corresponding run artifacts.
 
 ## Decision rules
-Subgroup metrics with small event counts are unstable and must not be used to rank groups or claim fairness. Report denominators and event counts, suppress sparse strata in any public release, and obtain external cohort-specific subgroup validation.\n\nNo single metric determines success. A method that improves AUROC while materially worsening calibration, AUPRC or retained-case safety is not declared superior. CORAL negative transfer must be reported. Thresholds must not be tuned on held-out target labels.
+Subgroup metrics with small event counts are unstable and must not be used to rank groups or claim fairness. Report denominators and event counts, suppress sparse strata in any public release, and obtain external cohort-specific subgroup validation.
+
+No single metric determines success. A method that improves AUROC while materially worsening calibration, AUPRC or retained-case safety is not declared superior. CORAL negative transfer must be reported. Thresholds must not be tuned on held-out target labels.
 
 ## Future authentic validation
 A future Nigerian multi-site study requires verified site provenance, data-use agreements, ethics approval, prespecified site-held-out evaluation, local calibration, subgroup analyses, missingness characterization and prospective workflow/human-factors evaluation. Until then, no Nigerian clinical validity claim is permitted.
