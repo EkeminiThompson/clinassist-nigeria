@@ -29,7 +29,7 @@ The prediction workspace exposes logistic regression, Random Forest and XGBoost.
 
 ## Research experiments
 ```bash
-PYTHONPATH=. python -m ml.experiments.run_shift_study --repeats 5 --missing-rate 0.10
+PYTHONPATH=. python -m ml.experiments.run_shift_study --repeats 5
 PYTHONPATH=. python -m ml.experiments.run_explanation_stability --seed 42 --n-explain 100
 ```
 Both are controlled public-benchmark studies, not external validation. Outputs go to `ml/artifacts/experiments/` and should be archived with the generated Pima manifest.
