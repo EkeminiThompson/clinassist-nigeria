@@ -13,6 +13,9 @@
 
 
 | Nigeria DHS 2023–24 microdata | National household survey with project-specific access requests; published 2026 analysis uses blood-sugar screening, self-reported diagnosis and treatment indicators among adults aged 15–49 | Useful for population care-cascade context, not a measured-biomarker hospital diagnostic cohort or site-held-out model validation | Request only for contextual epidemiology |
+
+| WHO Nigeria STEPS 2003 | WHO's Nigeria NCD surveillance page lists the 2003 STEPS country report; the current WHO STEPS microdata catalogue search did not surface a Nigeria respondent-level dataset | Historical report is useful context, but no public respondent-level Nigerian STEPS file has been confirmed | Ask WHO/FMoH about archived microdata; do not claim dataset access |
+| Nigeria DHS 2023–24 | Microdata access requires a registered DHS account and project-specific request; published analysis uses self-reported blood-sugar screening, diagnosis and treatment indicators | Useful for weighted care-cascade/context analysis, not measured clinical biomarkers or a hospital diagnostic validation cohort | Request for epidemiological context only |
 | FMoH HPPDM/PDM platform | Official FMoH DHPRS inventory of projects, datasets and stakeholders; approved research-user registration required for downloads | Formal discovery route; no specific qualifying diabetes dataset confirmed | Register and search NCD/diabetes inventory |
 | CIHP Clinical Data Repository | Public site describes a repository spanning 150+ facilities; access requires account | Facility coverage and diabetes variables, provenance, ethics and access conditions not independently verified | Institutional enquiry only |
 | Sule Lamido University HISCDR | Public page describes a TETFund-supported clinical data repository | Potential data infrastructure; no diabetes cohort or external access conditions confirmed | Enquiry only |
