@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 import pytest
+from sklearn.metrics import average_precision_score
 from ml.experiments.run_subgroup_statistical_audit import (
-    _metrics, _paired_bootstrap, _subgroups,
+    _average_precision_batch, _metrics, _paired_bootstrap, _subgroups,
 )
 
 
@@ -50,3 +51,14 @@ def test_identical_arms_produce_zero_paired_deltas_and_intervals():
 def test_invalid_probabilities_are_rejected():
     with pytest.raises(ValueError, match="finite and in"):
         _metrics(np.array([0, 1]), np.array([0.2, 1.2]))
+
+
+def test_vectorized_average_precision_matches_sklearn_with_tied_scores():
+    labels = np.array([[0, 1, 1, 0, 1, 0], [1, 0, 1, 0, 0, 1]])
+    scores = np.array([[0.5, 0.5, 0.5, 0.2, 0.2, 0.1],
+                       [0.3, 0.3, 0.7, 0.7, 0.1, 0.1]])
+    actual = _average_precision_batch(labels, scores)
+    expected = np.array([
+        average_precision_score(y, p) for y, p in zip(labels, scores)
+    ])
+    np.testing.assert_allclose(actual, expected, rtol=0, atol=1e-12)
