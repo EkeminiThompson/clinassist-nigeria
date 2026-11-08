@@ -25,13 +25,14 @@ npm install
 cp .env.example .env
 npm run dev
 ```
+The prediction workspace exposes logistic regression, Random Forest and XGBoost. The benchmark CSV is fetched and checksum-manifested with `PYTHONPATH=. python -m ml.datasets.download_pima`.
 
-## Controlled synthetic-shift experiment
-After placing a verified, licensed Pima CSV at `ml/datasets/diabetes_dataset.csv`, run:
+## Research experiments
 ```bash
 PYTHONPATH=. python -m ml.experiments.run_shift_study --repeats 5 --missing-rate 0.10
+PYTHONPATH=. python -m ml.experiments.run_explanation_stability --seed 42 --n-explain 100
 ```
-This compares source-only with CORAL under a clearly labelled synthetic covariate/missingness stress test. It is not external validation. Outputs go to `ml/artifacts/experiments/`.
+Both are controlled public-benchmark studies, not external validation. Outputs go to `ml/artifacts/experiments/` and should be archived with the generated Pima manifest.
 
 API docs: http://localhost:8000/api/docs
 
