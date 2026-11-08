@@ -78,6 +78,29 @@ def _metrics(y: np.ndarray, p: np.ndarray) -> dict:
     return result
 
 
+def _average_precision_batch(labels: np.ndarray, scores: np.ndarray) -> np.ndarray:
+    """Exact sklearn-style average precision for rows, including tied scores."""
+    order = np.argsort(-scores, axis=1, kind="mergesort")
+    sorted_labels = np.take_along_axis(labels, order, axis=1)
+    sorted_scores = np.take_along_axis(scores, order, axis=1)
+    cumulative_positives = np.cumsum(sorted_labels, axis=1)
+    group_ends = np.ones(sorted_labels.shape, dtype=bool)
+    group_ends[:, :-1] = sorted_scores[:, :-1] != sorted_scores[:, 1:]
+    previous_group_positives = np.concatenate([
+        np.zeros((len(labels), 1), dtype=float),
+        np.maximum.accumulate(np.where(
+            group_ends[:, :-1], cumulative_positives[:, :-1], 0
+        ), axis=1),
+    ], axis=1)
+    group_positives = cumulative_positives - previous_group_positives
+    precision_at_group_end = cumulative_positives / np.arange(
+        1, labels.shape[1] + 1, dtype=float
+    )[None, :]
+    return np.sum(
+        group_positives * precision_at_group_end * group_ends, axis=1
+    ) / labels.sum(axis=1)
+
+
 def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
     """Vectorised patient bootstrap; CORAL and source-only share each draw."""
     y = _validate_vectors(y, p_source, p_coral)
@@ -121,29 +144,8 @@ def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
             deltas["auroc"].extend((auc_b - auc_a).tolist())
 
             # Average precision: mean precision at each positive's rank.
-            def average_precision_batch(labels, scores):
-                order = np.argsort(-scores, axis=1, kind="mergesort")
-                sorted_labels = np.take_along_axis(labels, order, axis=1)
-                sorted_scores = np.take_along_axis(scores, order, axis=1)
-                cumulative_positives = np.cumsum(sorted_labels, axis=1)
-                group_ends = np.ones(sorted_labels.shape, dtype=bool)
-                group_ends[:, :-1] = sorted_scores[:, :-1] != sorted_scores[:, 1:]
-                previous_group_positives = np.concatenate([
-                    np.zeros((len(labels), 1), dtype=float),
-                    np.maximum.accumulate(np.where(
-                        group_ends[:, :-1], cumulative_positives[:, :-1], 0
-                    ), axis=1),
-                ], axis=1)
-                group_positives = cumulative_positives - previous_group_positives
-                precision_at_group_end = cumulative_positives / np.arange(
-                    1, n + 1, dtype=float
-                )[None, :]
-                return np.sum(
-                    group_positives * precision_at_group_end * group_ends, axis=1
-                ) / positives
-
-            ap_a = average_precision_batch(yy, a)
-            ap_b = average_precision_batch(yy, b)
+            ap_a = _average_precision_batch(yy, a)
+            ap_b = _average_precision_batch(yy, b)
             deltas["auprc"].extend((ap_b - ap_a).tolist())
 
             # Brier delta is the paired mean squared-error difference.
