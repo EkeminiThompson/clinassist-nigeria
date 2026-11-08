@@ -104,15 +104,17 @@ The intended audit reports overall, age (<30, 30–49, 50+) and BMI (<18.5, 18.5
 - finite, ordered percentile confidence limits;
 - explicit sparse-stratum status rather than unstable estimates.
 
-These Pima age/BMI strata cannot support Nigerian fairness claims. The cohort is female-only and cannot assess sex differences.
+Across the overall group in the combined-severe scenario, paired-bootstrap AUROC intervals excluded zero in 6/15 model-by-seed comparisons, AUPRC intervals in 5/15, and Brier intervals favoured CORAL in 15/15. In the age strata, 42 combined-severe intervals were available; AUROC/AUPRC/Brier intervals excluded zero in 3/42, 4/42 and 20/42 comparisons. In BMI strata, 30 intervals were available; the corresponding counts were 4/30, 3/30 and 21/30. These are exploratory within-split comparisons, not multiplicity-adjusted subgroup tests.
+
+The underweight BMI stratum contained one participant when present. The 18.5–24.9 BMI stratum had 0–3 events in held-out splits and was suppressed. The older-age stratum sometimes fell below the minimum sample-size threshold. These Pima age/BMI strata cannot support Nigerian fairness claims. The cohort is female-only and cannot assess sex differences.
 
 ## 7. Statistical and reporting limitations
 
 1. Five repeated splits describe sensitivity to the chosen split seeds; overlapping participants mean these are not independent replications.
 2. The controlled shift grid is stylised and cannot establish real-world site or temporal robustness.
 3. No independent Nigerian cohort, prospective evaluation or clinical workflow assessment is available.
-4. Calibration plots and uncertainty intervals for the main scenario-level metrics should accompany the final manuscript.
-5. Subgroup analysis is pending; no subgroup fairness conclusion is supported.
+4. Descriptive calibration curves have been generated from repeated held-out predictions; final uncertainty-aware calibration reporting remains necessary.
+5. Subgroup estimates are sparse and exploratory; no subgroup fairness conclusion is supported.
 6. The outcome is the historical Pima dataset label, not a validated Nigerian prospective diabetes-risk endpoint.
 7. The study does not establish clinical utility or justify diagnosis, screening, triage or treatment decisions.
 
