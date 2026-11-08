@@ -1,8 +1,8 @@
 from pydantic_settings import BaseSettings,SettingsConfigDict
-from pydantic import model_validator
+from pydantic import Field,model_validator
 class Settings(BaseSettings):
     secret_key:str="development-only-change-before-deployment"
-    access_token_expire_minutes:int=60
+    access_token_expire_minutes:int=Field(default=60,gt=0,le=1440)
     database_url:str="sqlite:///./clinassist.db"
     cors_origins:str="http://localhost:5173,http://localhost:4173"
     environment:str="development"
@@ -14,6 +14,8 @@ class Settings(BaseSettings):
                 raise ValueError("Production requires a unique SECRET_KEY of at least 32 characters")
             if self.database_url.startswith("sqlite"):
                 raise ValueError("Production requires a managed database; SQLite is development-only")
+            if "*" in self.allowed_origins:
+                raise ValueError("Wildcard CORS origins are not allowed in production")
         return self
     @property
     def allowed_origins(self):

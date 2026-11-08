@@ -44,7 +44,7 @@ def risk_coverage_curve(y_true,y_prob,uncertainty):
     if u.size!=y.size or not np.isfinite(u).all(): raise ValueError("uncertainty must be finite and match y_true")
     order=np.argsort(u,kind="stable"); errors=((p>=0.5).astype(int)!=y).astype(float)[order]
     coverage=np.arange(1,len(y)+1,dtype=float)/len(y); risk=np.cumsum(errors)/np.arange(1,len(y)+1)
-    aurc=float(np.trapz(risk,coverage)) if len(y)>1 else float(risk[0])
+    aurc=float(np.sum((risk[1:]+risk[:-1])*0.5*np.diff(coverage))) if len(y)>1 else float(risk[0])
     return {"coverage":coverage.tolist(),"risk":risk.tolist(),"aurc":aurc}
 
 def selective_prediction_metrics(y_true,y_prob,uncertainty,coverage=0.8):

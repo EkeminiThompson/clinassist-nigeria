@@ -20,7 +20,7 @@ from sklearn.calibration import CalibratedClassifierCV
 ROOT=Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path: sys.path.insert(0,str(ROOT))
 from ml.domain_adaptation.coral import CORALAdapter
-from ml.evaluation.metrics import full_evaluation,bootstrap_metric_intervals
+from ml.evaluation.metrics import full_evaluation
 from ml.preprocessing.pipeline import FEATURE_COLUMNS,build_preprocessing_pipeline,load_pima_benchmark
 DATA=ROOT/"ml/datasets/diabetes_dataset.csv"; OUT=ROOT/"ml/artifacts/experiments"
 
@@ -55,7 +55,7 @@ def _json_safe(value):
 
 def run_study(repeats=5,models=("logistic_regression","random_forest","hist_gradient_boosting"),missing_rate=0.1):
     X,y=load_pima_benchmark(str(DATA)); X=X[FEATURE_COLUMNS].to_numpy(dtype=float); y=y.to_numpy(dtype=int)
-    rows=[]; predictions={}
+    rows=[]
     for seed in range(42,42+repeats):
         ix=np.arange(len(y)); train_ix,test_ix=train_test_split(ix,test_size=.25,stratify=y,random_state=seed)
         raw_train,raw_test=X[train_ix],X[test_ix]; y_train,y_test=y[train_ix],y[test_ix]
@@ -75,7 +75,6 @@ def run_study(repeats=5,models=("logistic_regression","random_forest","hist_grad
                 uncertainty=-(np.clip(prob,1e-8,1-1e-8)*np.log(np.clip(prob,1e-8,1-1e-8))+(1-np.clip(prob,1e-8,1-1e-8))*np.log(1-np.clip(prob,1e-8,1-1e-8)))
                 metrics=full_evaluation(y_test,prob,uncertainty,coverage=.8)
                 rows.append({"seed":seed,"model":model_name,"scenario":scenario,"n_train":len(train_ix),"n_test":len(test_ix),"synthetic_missing_rate":missing_rate,**metrics})
-                predictions[f"{seed}:{model_name}:{scenario}"]={"y_true":y_test.tolist(),"probability":prob.tolist(),"uncertainty":uncertainty.tolist()}
     frame=pd.DataFrame(rows); OUT.mkdir(parents=True,exist_ok=True)
     frame.to_csv(OUT/"synthetic_shift_runs.csv",index=False)
     summary=frame.groupby(["model","scenario"]).agg({c:["mean","std"] for c in ["auroc","auprc","brier","ece","aurc","selective_auroc","selective_brier"]}).round(5)
