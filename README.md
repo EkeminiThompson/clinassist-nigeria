@@ -31,10 +31,11 @@ The prediction workspace exposes logistic regression, Random Forest and XGBoost.
 ```bash
 PYTHONPATH=. python -m ml.experiments.run_shift_study --repeats 5
 PYTHONPATH=. python -m ml.experiments.run_explanation_stability --seed 42 --n-explain 100
+PYTHONPATH=. python -m ml.experiments.run_subgroup_statistical_audit --bootstrap 1000 --seed 2026
 ```
-Both are controlled public-benchmark studies, not external validation. Outputs go to `ml/artifacts/experiments/` and should be archived with the generated Pima manifest.
+These are controlled public-benchmark studies, not external validation. The shift study reports calibration, selective metrics and paired CORAL deltas; the explanation study measures local TreeSHAP rank stability; the audit reports descriptive age/BMI strata and paired within-split bootstrap intervals. Subgroups are exploratory and do not establish Nigerian fairness. Outputs go to `ml/artifacts/experiments/` and should be archived with the generated Pima manifest. GitHub Actions also runs all three scripts and uploads a `clinassist-research-results` artifact.
 
-API docs: http://localhost:8000/api/docs
+Development API docs: http://localhost:8000/api/docs (disabled in production).
 
 ## Validation and ethics
 No Nigerian hospital validation is claimed. Preprocessing is fitted on source training data only; target labels are not used for CORAL adaptation. SHAP is not causal. Clinical deployment requires ethics approval, local calibration, prospective workflow evaluation and independent external validation.
