@@ -10,7 +10,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
-from ml.preprocessing.pipeline import load_pima_benchmark\nfrom ml.evaluation.metrics import full_evaluation
+from ml.preprocessing.pipeline import load_pima_benchmark
+from ml.evaluation.metrics import full_evaluation
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "ml/datasets/diabetes_dataset.csv"
