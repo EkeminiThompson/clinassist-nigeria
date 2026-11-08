@@ -1,79 +1,37 @@
 # ClinAssist Nigeria
 
-**Research title:** An Explainable, Uncertainty-Aware and Offline-Capable Domain Adaptation Framework for Multi-Hospital Clinical Decision Support in Resource-Constrained Healthcare Settings.
+Research prototype for explainable, uncertainty-aware and offline-capable clinical decision support under resource constraints.
 
-**Repository:** private – EkeminiThompson/clinassist-nigeria  
-**Status:** Active research & engineering (Phase 2–3)
+## Data integrity
+The Mendeley deposit described as UITH + General Hospital Offa was found to repackage public Pima Indians Diabetes data without hospital identifiers. ESUTH research data remain inaccessible. The current model is a **public benchmark only**. Controlled synthetic shifts are not Nigerian external validation. See docs/dataset_provenance.md.
 
-## Important Data Statement
+## Features
+- FastAPI with JWT authentication, roles and audit logging.
+- SHAP where supported; coefficient fallback is explicitly labelled.
+- Entropy-based uncertainty and abstention.
+- React + Ant Design PWA and IndexedDB queue.
+- Offline receipt sync metadata only; no offline inference.
+- Research paper outline and security notes.
 
-The Mendeley deposit previously considered as “UITH + General Hospital Offa” was independently inspected and found to be a re-packaging of the public **Pima Indians Diabetes** dataset. It contains no hospital identifiers and cannot support true cross-hospital domain-adaptation claims for Nigerian sites.
-
-The original ESUTH research dataset associated with earlier work remains inaccessible.
-
-**Current modelling therefore uses the public Pima dataset strictly as a methodological benchmark.** All results are labelled accordingly. The software architecture and experimental pipeline are designed so that verified multi-site Nigerian cohorts can be plugged in when they become available.
-
-See `docs/dataset_provenance.md` and `docs/research_gap.md` for the full record.
-
-## Research Objectives
-
-1. Develop and evaluate domain-adaptation methods suitable for small tabular clinical datasets under distribution shift.
-2. Integrate calibrated uncertainty quantification and selective prediction (abstention when uncertainty is high).
-3. Quantify explanation stability (SHAP) under controlled shift.
-4. Investigate missing-data robustness.
-5. Deliver an offline-capable clinical decision support interface suitable for Nigerian teaching-hospital infrastructure constraints.
-
-## Architecture (high-level)
-
-```
-clinassist-nigeria/
-├── backend/          # FastAPI, Pydantic, SQLAlchemy, ML inference layer
-├── frontend/         # React + TypeScript + Ant Design + PWA
-├── ml/
-│   ├── preprocessing/
-│   ├── domain_adaptation/   # CORAL and related methods
-│   ├── uncertainty/         # Bootstrap & selective prediction
-│   ├── explainability/
-│   ├── evaluation/
-│   ├── experiments/         # Reproducible experiment scripts
-│   └── artifacts/           # Versioned experiment outputs (no patient data)
-├── docs/             # Research methodology, governance, model cards
-└── tests/
-```
-
-## Quick Start (development)
-
+## Backend (Python 3.11 recommended)
 ```bash
-# Backend
-cd backend
-python -m venv .venv
+python3.11 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+pip install -r backend/requirements.txt
+export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
+export PYTHONPATH="$PWD"
+uvicorn backend.app.main:app --reload
+```
+Create first admin (same environment): set ADMIN_EMAIL, ADMIN_NAME and ADMIN_PASSWORD (12+ chars), then run `python -m backend.scripts.create_admin`.
 
-# Frontend (once scaffolded)
+## Frontend
+```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
+API docs: http://localhost:8000/api/docs
 
-## Reproducible Baseline Experiments
-
-```bash
-cd ml
-python -m experiments.run_baselines
-```
-
-Results are written to `ml/artifacts/experiments/` with full data-source provenance.
-
-## Ethics & Intended Use
-
-- The system is intended to **support** qualified healthcare professionals.
-- It does **not** provide autonomous diagnosis or treatment recommendations.
-- No identifiable patient data are stored in the repository.
-- All experimental claims are restricted to the exact data and protocol used.
-
----
-
-*Principal investigator / lead engineer: Ekemini Thompson*  
-*This is a living research repository. Claims evolve only with evidence.*
+## Validation and ethics
+No Nigerian hospital validation is claimed. Preprocessing must be fitted inside training folds. SHAP is not causal. Clinical deployment requires ethics approval, local calibration, prospective workflow evaluation and independent external validation.
