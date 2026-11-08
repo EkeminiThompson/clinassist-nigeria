@@ -9,6 +9,7 @@ from backend.app.models import User,SyncReceipt
 from backend.app.security import get_current_user
 router=APIRouter(prefix="/api/v1/sync",tags=["offline-sync"])
 class Record(BaseModel):
+    model_config=ConfigDict(extra="forbid")
     client_id:str=Field(min_length=8,max_length=80,pattern=r"^[A-Za-z0-9_-]+$")
     record_type:Literal["prediction"]
     created_at:datetime
