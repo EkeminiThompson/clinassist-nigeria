@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from backend.app.core.config import settings
 from backend.app.db import get_db
 from backend.app.models import User
-pwd_context=CryptContext(schemes=['bcrypt'],deprecated='auto');oauth2_scheme=OAuth2PasswordBearer(tokenUrl='/api/v1/auth/login')
+pwd_context=CryptContext(schemes=['argon2'],deprecated='auto');oauth2_scheme=OAuth2PasswordBearer(tokenUrl='/api/v1/auth/login')
 def hash_password(p):
  if len(p)<12: raise ValueError('Password must contain at least 12 characters')
  return pwd_context.hash(p)

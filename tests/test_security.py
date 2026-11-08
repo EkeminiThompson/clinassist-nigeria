@@ -7,4 +7,6 @@ def test_password_minimum():
  try:hash_password('short')
  except ValueError:return
  assert False
+def test_long_password_hash():
+ h=hash_password('long-password-'*12);assert verify_password('long-password-'*12,h)
 def test_token_subject():assert jwt.decode(create_access_token('42'),settings.secret_key,algorithms=['HS256'])['sub']=='42'
