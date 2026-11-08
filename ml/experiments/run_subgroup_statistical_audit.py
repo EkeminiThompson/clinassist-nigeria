@@ -121,13 +121,29 @@ def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
             deltas["auroc"].extend((auc_b - auc_a).tolist())
 
             # Average precision: mean precision at each positive's rank.
-            order_a = np.argsort(-a, axis=1, kind="mergesort")
-            order_b = np.argsort(-b, axis=1, kind="mergesort")
-            sorted_a = np.take_along_axis(yy, order_a, axis=1)
-            sorted_b = np.take_along_axis(yy, order_b, axis=1)
-            ranks = np.arange(1, n + 1, dtype=float)[None, :]
-            ap_a = np.sum((np.cumsum(sorted_a, axis=1) / ranks) * sorted_a, axis=1) / positives
-            ap_b = np.sum((np.cumsum(sorted_b, axis=1) / ranks) * sorted_b, axis=1) / positives
+            def average_precision_batch(labels, scores):
+                order = np.argsort(-scores, axis=1, kind="mergesort")
+                sorted_labels = np.take_along_axis(labels, order, axis=1)
+                sorted_scores = np.take_along_axis(scores, order, axis=1)
+                cumulative_positives = np.cumsum(sorted_labels, axis=1)
+                group_ends = np.ones(sorted_labels.shape, dtype=bool)
+                group_ends[:, :-1] = sorted_scores[:, :-1] != sorted_scores[:, 1:]
+                previous_group_positives = np.concatenate([
+                    np.zeros((len(labels), 1), dtype=float),
+                    np.maximum.accumulate(np.where(
+                        group_ends[:, :-1], cumulative_positives[:, :-1], 0
+                    ), axis=1),
+                ], axis=1)
+                group_positives = cumulative_positives - previous_group_positives
+                precision_at_group_end = cumulative_positives / np.arange(
+                    1, n + 1, dtype=float
+                )[None, :]
+                return np.sum(
+                    group_positives * precision_at_group_end * group_ends, axis=1
+                ) / positives
+
+            ap_a = average_precision_batch(yy, a)
+            ap_b = average_precision_batch(yy, b)
             deltas["auprc"].extend((ap_b - ap_a).tolist())
 
             # Brier delta is the paired mean squared-error difference.
