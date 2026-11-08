@@ -1,15 +1,15 @@
 # Research benchmark results review
 
-**Latest completed workflow:** GitHub Actions run [42464788999](https://github.com/EkeminiThompson/clinassist-nigeria/actions/runs/42464788999)  
-**Commit evaluated by that run:** `bd648d4e927da13bf3008cb6d53f9b3e2528f82f`  
-**Artifact:** `clinassist-research-results` (ID `13613280079`; ZIP SHA-256 `9af01326e273b5ddbd14f9a2ed6a6efdc6bf7b3c3d27dc24add7afb004387ea7`)  
+**Latest completed workflow:** GitHub Actions run [42472051266](https://github.com/EkeminiThompson/clinassist-nigeria/actions/runs/42472051266)  
+**Commit evaluated by that run:** `2d3abe3199288cda92fb679beb1c97a674a5d9c2`  
+**Artifact:** `clinassist-research-results` (ID `13613489987`; ZIP SHA-256 `f315ebe4d3e599b75281b534984d4a9bddf255375a99e0dd9f808efbcdae2e29`)  
 **Current PR branch head when this review was updated:** see [PR #1](https://github.com/EkeminiThompson/clinassist-nigeria/pull/1).  
 **Dataset:** OpenML data ID 37, version 1; 768 records, eight predictors, 500 negative and 268 positive.  
 **Interpretation:** Pima methodological benchmark only. It is not Nigerian hospital data, external validation, clinical validation, or evidence of Nigerian population generalisability.
 
 ## 1. Execution and artifact audit
 
-Backend and frontend CI passed in the completed run. Benchmark retrieval, five-repeat controlled shift experiment and TreeSHAP explanation-stability experiment completed. The artifact contains:
+Backend, frontend and research-benchmark jobs all passed in run 42472051266. Benchmark retrieval, five-repeat controlled-shift experiment, TreeSHAP explanation-stability experiment and the subgroup/paired-bootstrap audit all completed. The artifact contains:
 
 - `baseline_cv_results.json`
 - `domain_adaptation_results.json`
@@ -21,9 +21,7 @@ Backend and frontend CI passed in the completed run. Benchmark retrieval, five-r
 - `synthetic_shift_summary.csv`
 - `pima_manifest.json`
 
-**The subgroup audit did not complete.** The workflow was cancelled during that step. Neither `subgroup_metrics.csv` nor `subgroup_paired_bootstrap.csv` exists in this artifact. No subgroup metric or subgroup confidence interval is reported here.
-
-The subgroup audit implementation has since been replaced with a vectorised paired-bootstrap implementation, stricter prediction/label pairing checks, tie-aware AUPRC computation, explicit sparse-stratum suppression and stronger artifact assertions. Those changes are on the PR branch after the commit evaluated by run 42464788999. They remain unverified by a fresh successful GitHub Actions run.
+The artifact includes `subgroup_metrics.csv` (1,638 rows) and `subgroup_paired_bootstrap.csv` (819 rows). The workflow reported 609 successful interval comparisons and 210 explicitly suppressed sparse-stratum comparisons. The downloaded ZIP was independently inspected. All three CI jobs and the subgroup audit step completed successfully.
 
 ## 2. Benchmark provenance
 
@@ -94,15 +92,15 @@ Rank-biased overlap (RBO) for 100 explained cases, seed 42:
 
 Feature-rank stability declined as perturbation magnitude increased. This is a local sensitivity experiment on Pima data, with one seed. It does not establish explanation correctness, causal validity, clinician usefulness or cross-hospital stability.
 
-## 6. Subgroup and paired-bootstrap audit — outstanding
+## 6. Subgroup and paired-bootstrap audit — completed
 
 The intended audit reports overall, age (<30, 30–49, 50+) and BMI (<18.5, 18.5–24.9, 25–29.9, >=30) strata. Zero BMI is excluded from BMI grouping. Strata with fewer than 20 observations or fewer than five events in either class must retain denominator information but suppress unstable discrimination estimates. The paired bootstrap resamples the same held-out patient rows for source-only and CORAL predictions within each seed/model/scenario.
 
-**No subgroup results can yet be reported.** The latest completed artifact has no subgroup CSVs. The updated implementation must pass a fresh run and the uploaded files must be checked for:
+**Audit result:** The completed run produced 1,638 metric rows and 819 paired-bootstrap rows. The source-only and CORAL arms had exactly matching held-out patient counts and event counts in every paired comparison. All 819 comparison keys were unique. Among successful comparisons, 595 used 1,000 valid bootstrap replicates, 12 used 999 and two used 998; all exceed the 900-replicate threshold. All successful interval bounds were finite and ordered. Sparse rows were explicitly labelled `insufficient subgroup events` and contained no unstable metric estimates. The uploaded files were independently checked for:
 - non-empty rows and required columns;
-- correct subgroup denominators and event counts;
-- paired source-only/CORAL rows and identical labels;
-- at least 900 valid draws from each requested 1,000-replicate bootstrap where the stratum is eligible;
+- valid denominators and event counts;
+- identical source-only/CORAL patient rows and labels;
+- at least 900 valid draws from each requested 1,000-replicate bootstrap where eligible;
 - finite, ordered percentile confidence limits;
 - explicit sparse-stratum status rather than unstable estimates.
 
@@ -120,8 +118,8 @@ These Pima age/BMI strata cannot support Nigerian fairness claims. The cohort is
 
 ## 8. Reproducibility and manuscript status
 
-The workflow artifact preserves baseline results, repeated split-level results, predictions, paired differences, summary metrics, TreeSHAP stability results and the dataset manifest. The manifest records the dataset version and SHA-256. The subgroup audit outputs are absent and must not be implied by the current artifact.
+The workflow artifact preserves baseline results, repeated split-level results, predictions, paired differences, summary metrics, TreeSHAP stability results, subgroup metrics, paired-bootstrap intervals and the dataset manifest. The manifest records the dataset version and SHA-256. Run 42472051266 passed backend, frontend and research-benchmark jobs on the current PR head.
 
-Before journal submission, add the successful subgroup audit artifact, calibration plots, final figures/tables, a complete literature synthesis, a TRIPOD+AI-aligned manuscript checklist, full author contribution statements and a target-journal-specific format check.
+Before journal submission, add final calibration plots, reconcile final figures/tables with the completed artifact, complete a literature synthesis, finish TRIPOD+AI and PROBAST+AI appraisals, obtain supervisor review, confirm authorship/contributions and declarations, and perform a target-journal-specific format check.
 
-**Bottom line:** The completed experiments support a narrow methodological finding about model- and scenario-dependent CORAL behaviour under controlled shifts. They do not establish Nigerian clinical validity or generalisability. The corrected subgroup audit is the immediate reproducibility gate.
+**Bottom line:** The completed experiments support a narrow methodological finding about model- and scenario-dependent CORAL behaviour under controlled shifts. The subgroup audit now runs successfully and its sparse-stratum limitations are documented. The work still does not establish Nigerian clinical validity or generalisability.
