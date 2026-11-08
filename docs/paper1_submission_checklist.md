@@ -17,14 +17,14 @@
 | Baseline results | Verified in run 42464788999 artifact | Five-fold comparison table included. |
 | Repeated shift results | Verified in run 42464788999 artifact | 210 evaluations, five seeds; results and paired differences included. |
 | TreeSHAP stability | Verified in run 42464788999 artifact | 100 explanations, one seed; RBO table included. |
-| Subgroup metrics | Blocked | Latest artifact has no `subgroup_metrics.csv`. Complete the updated audit and inspect denominators and event counts. |
-| Paired-bootstrap intervals | Blocked | Latest artifact has no `subgroup_paired_bootstrap.csv`. Complete the updated 1,000-replicate paired bootstrap and verify intervals. |
-| Calibration plots | Not prepared | Produce calibration curves with appropriate uncertainty for baseline and selected shift scenarios; include intercept/slope interpretation. |
-| Figures | Provisional | Five chart files generated from verified artifact values. Final journal styling and repository/supplementary inclusion remain pending. |
+| Subgroup metrics | Completed | Run 42472051266 produced 1,638 rows; sparse strata retain denominators and suppress unstable estimates. See `docs/paper1_subgroup_audit_results.md`. |
+| Paired-bootstrap intervals | Completed | 819 paired comparisons; 609 eligible intervals; 210 sparse comparisons suppressed. All successful rows had >=900 valid draws and finite ordered intervals. |
+| Calibration plots | Provisional | Descriptive eight-quantile-bin curves generated for reference and combined-severe scenarios; no confidence bands. Final uncertainty-aware calibration reporting remains outstanding. |
+| Figures | Provisional | Five benchmark figures plus three calibration plots generated locally from verified artifact outputs. Final journal styling, figure-source scripts and repository/supplementary inclusion remain pending. |
 | Tables | Drafted | Baseline, paired AUROC deltas and combined-severe calibration tables included. Reconcile after final audit. |
 | Discussion | Drafted | Revisit after subgroup results and calibration figures are final. |
 | Limitations | Drafted | Explicitly states no Nigerian cohort, no prospective validation, five overlapping split seeds and no clinical utility evaluation. |
-| Reproducibility | Partial | Scripts, protocol and artifact exist. A fresh green workflow on the latest commit and immutable release are required. |
+| Reproducibility | Improved | Run 42472051266 passed backend, frontend and research jobs on code commit `2d3abe3`; artifact ID `13613489987`. Documentation commits followed the run and should receive a final push-triggered CI confirmation. Immutable release remains pending. |
 | TRIPOD+AI | Pending | Complete the 27-item reporting checklist and abstract checklist; report missing items rather than imply compliance. |
 | PROBAST+AI | Pending | Conduct a structured self-appraisal of model-development and evaluation risk of bias/applicability. |
 | Ethics statement | Pending determination | No ethics approval or exemption is claimed. Ask the NAU research ethics process whether a determination is required for this secondary public-dataset analysis. |
@@ -38,13 +38,14 @@
 
 ## Mandatory release gates
 
-1. Run the CI workflow on the current PR head and obtain green backend, frontend and research jobs.
-2. Confirm the two subgroup CSVs exist, are non-empty and pass schema, pairing, denominator, event-count and interval checks.
-3. Reconcile the manuscript and benchmark review with the successful run's artifact.
-4. Add final calibration figures and verify every plotted value against the artifact.
+1. Obtain a final push-triggered CI confirmation after the documentation-only commits; the code commit `2d3abe3` already passed all three jobs.
+2. Preserve and cite the successful subgroup artifact; audit outputs, pairing and intervals have been independently checked.
+3. Reconcile the manuscript and benchmark review with run 42472051266.
+4. Finalise calibration figures, add reproducible figure-generation code and consider uncertainty bands/alternative calibration summaries.
 5. Complete TRIPOD+AI and PROBAST+AI review.
 6. Obtain supervisor review and agree author order, contributions and declarations.
-7. Select a journal and format the manuscript to its current requirements.
+7. Obtain the appropriate institutional ethics determination if required.
+8. Select a journal and format the manuscript to its current requirements.
 
 ## Separate future Nigerian hospital study
 
