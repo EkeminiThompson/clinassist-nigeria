@@ -1,16 +1,19 @@
-"""Subgroup and paired-bootstrap audit of held-out synthetic-shift predictions.
+"""Fast, paired subgroup bootstrap audit of held-out Pima predictions.
 
-These are exploratory strata in the historical Pima benchmark, not Nigerian
-fairness evidence. Patient-row resampling is paired across source-only/CORAL
-predictions within each seed/model/scenario. Small strata are retained in the
-denominator table but not given unstable discrimination estimates.
+Exploratory age/BMI strata only. This is not Nigerian fairness evidence or
+external clinical validation. Bootstrap resampling is paired by patient row
+within each seed/model/scenario and preserves the source-only/CORAL pairing.
 """
 from __future__ import annotations
+
 import argparse
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
+from scipy.stats import rankdata
 from sklearn.metrics import average_precision_score, brier_score_loss, roc_auc_score
+
 from ml.preprocessing.pipeline import load_pima_benchmark
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -19,115 +22,266 @@ PRED = ROOT / "ml/artifacts/experiments/synthetic_shift_predictions.csv"
 OUT = ROOT / "ml/artifacts/experiments"
 MIN_N = 20
 MIN_CLASS = 5
+MIN_VALID_FRACTION = 0.90
+BOOTSTRAP_BATCH_SIZE = 128
+
 
 def _subgroups(features: pd.DataFrame) -> pd.DataFrame:
     out = pd.DataFrame(index=features.index)
     age = pd.to_numeric(features["Age"], errors="coerce")
-    out["age_group"] = pd.cut(age, bins=[-np.inf, 29, 49, np.inf],
-                              labels=["<30", "30-49", "50+"], right=True).astype("object")
+    out["age_group"] = pd.cut(
+        age, bins=[-np.inf, 29, 49, np.inf],
+        labels=["<30", "30-49", "50+"], right=True,
+    ).astype("object")
     bmi = pd.to_numeric(features["BMI"], errors="coerce").replace(0, np.nan)
-    out["bmi_group"] = pd.cut(bmi, bins=[-np.inf, 18.5, 25, 30, np.inf],
-                              labels=["<18.5", "18.5-24.9", "25-29.9", ">=30"],
-                              right=False).astype("object")
+    out["bmi_group"] = pd.cut(
+        bmi, bins=[-np.inf, 18.5, 25, 30, np.inf],
+        labels=["<18.5", "18.5-24.9", "25-29.9", ">=30"], right=False,
+    ).astype("object")
     out.loc[bmi.isna(), "bmi_group"] = np.nan
     return out
 
+
+def _validate_vectors(y, *probabilities) -> np.ndarray:
+    y = np.asarray(y, dtype=int)
+    if y.ndim != 1 or not np.isin(y, [0, 1]).all():
+        raise ValueError("y must be a one-dimensional binary array")
+    for p in probabilities:
+        p = np.asarray(p, dtype=float)
+        if p.shape != y.shape:
+            raise ValueError("Each probability vector must match y")
+        if not np.isfinite(p).all() or ((p < 0) | (p > 1)).any():
+            raise ValueError("Probabilities must be finite and in [0, 1]")
+    return y
+
+
 def _metrics(y: np.ndarray, p: np.ndarray) -> dict:
-    y=np.asarray(y,dtype=int); p=np.asarray(p,dtype=float)
-    result={"n":int(len(y)),"events":int(y.sum()),
-            "prevalence":float(y.mean()) if len(y) else float("nan")}
-    if len(y)<MIN_N or y.sum()<MIN_CLASS or (len(y)-y.sum())<MIN_CLASS:
-        result.update({"eligible_for_metrics":False,"auroc":np.nan,
-                       "auprc":np.nan,"brier":np.nan})
+    y = _validate_vectors(y, p)
+    p = np.asarray(p, dtype=float)
+    result = {
+        "n": int(len(y)),
+        "events": int(y.sum()),
+        "prevalence": float(y.mean()) if len(y) else float("nan"),
+    }
+    if len(y) < MIN_N or y.sum() < MIN_CLASS or (len(y) - y.sum()) < MIN_CLASS:
+        result.update({
+            "eligible_for_metrics": False,
+            "auroc": np.nan, "auprc": np.nan, "brier": np.nan,
+        })
         return result
-    result.update({"eligible_for_metrics":True,
-        "auroc":float(roc_auc_score(y,p)),
-        "auprc":float(average_precision_score(y,p)),
-        "brier":float(brier_score_loss(y,p))})
+    result.update({
+        "eligible_for_metrics": True,
+        "auroc": float(roc_auc_score(y, p)),
+        "auprc": float(average_precision_score(y, p)),
+        "brier": float(brier_score_loss(y, p)),
+    })
     return result
+
 
 def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
-    y=np.asarray(y,dtype=int); ps=np.asarray(p_source,dtype=float); pc=np.asarray(p_coral,dtype=float)
-    if len(y)<MIN_N or y.sum()<MIN_CLASS or (len(y)-y.sum())<MIN_CLASS:
-        return {"valid_replicates":0,"auroc_delta":np.nan,"auroc_ci_lower":np.nan,
-                "auroc_ci_upper":np.nan,"auprc_delta":np.nan,"auprc_ci_lower":np.nan,
-                "auprc_ci_upper":np.nan,"brier_delta":np.nan,"brier_ci_lower":np.nan,
-                "brier_ci_upper":np.nan,"status":"insufficient subgroup events"}
-    values={"auroc":[],"auprc":[],"brier":[]}
-    n=len(y)
-    for _ in range(n_bootstrap):
-        ix=rng.integers(0,n,n); yy=y[ix]
-        if yy.sum()<1 or (len(yy)-yy.sum())<1:
-            continue
-        a,b=ps[ix],pc[ix]
-        values["auroc"].append(roc_auc_score(yy,b)-roc_auc_score(yy,a))
-        values["auprc"].append(average_precision_score(yy,b)-average_precision_score(yy,a))
-        values["brier"].append(brier_score_loss(yy,b)-brier_score_loss(yy,a))
-    result={"valid_replicates":len(values["auroc"]),"status":"ok"}
-    for metric,arr in values.items():
-        if arr:
-            result[f"{metric}_delta"]=float(np.mean(arr))
-            result[f"{metric}_ci_lower"]=float(np.quantile(arr,.025))
-            result[f"{metric}_ci_upper"]=float(np.quantile(arr,.975))
-        else:
-            result[f"{metric}_delta"]=result[f"{metric}_ci_lower"]=result[f"{metric}_ci_upper"]=np.nan
+    """Vectorised patient bootstrap; CORAL and source-only share each draw."""
+    y = _validate_vectors(y, p_source, p_coral)
+    ps = np.asarray(p_source, dtype=float)
+    pc = np.asarray(p_coral, dtype=float)
+    empty = {
+        f"{metric}_{suffix}": np.nan
+        for metric in ("auroc", "auprc", "brier")
+        for suffix in ("delta", "ci_lower", "ci_upper")
+    }
+    if len(y) < MIN_N or y.sum() < MIN_CLASS or (len(y) - y.sum()) < MIN_CLASS:
+        return {
+            "valid_replicates": 0, **empty,
+            "status": "insufficient subgroup events",
+        }
+
+    n = len(y)
+    deltas = {"auroc": [], "auprc": [], "brier": []}
+    valid = 0
+    remaining = n_bootstrap
+
+    while remaining:
+        batch = min(BOOTSTRAP_BATCH_SIZE, remaining)
+        indices = rng.integers(0, n, size=(batch, n))
+        yy = y[indices]
+        positives = yy.sum(axis=1)
+        keep = (positives > 0) & (positives < n)
+        if keep.any():
+            yy = yy[keep]
+            a = ps[indices[keep]]
+            b = pc[indices[keep]]
+            positives = positives[keep].astype(float)
+            negatives = n - positives
+            valid += len(yy)
+
+            # Rank-based AUROC with average ranks for tied probabilities.
+            ranks_a = rankdata(a, axis=1, method="average")
+            ranks_b = rankdata(b, axis=1, method="average")
+            auc_a = (np.sum(ranks_a * yy, axis=1) - positives * (positives + 1) / 2) / (positives * negatives)
+            auc_b = (np.sum(ranks_b * yy, axis=1) - positives * (positives + 1) / 2) / (positives * negatives)
+            deltas["auroc"].extend((auc_b - auc_a).tolist())
+
+            # Average precision: mean precision at each positive's rank.
+            order_a = np.argsort(-a, axis=1, kind="mergesort")
+            order_b = np.argsort(-b, axis=1, kind="mergesort")
+            sorted_a = np.take_along_axis(yy, order_a, axis=1)
+            sorted_b = np.take_along_axis(yy, order_b, axis=1)
+            ranks = np.arange(1, n + 1, dtype=float)[None, :]
+            ap_a = np.sum((np.cumsum(sorted_a, axis=1) / ranks) * sorted_a, axis=1) / positives
+            ap_b = np.sum((np.cumsum(sorted_b, axis=1) / ranks) * sorted_b, axis=1) / positives
+            deltas["auprc"].extend((ap_b - ap_a).tolist())
+
+            # Brier delta is the paired mean squared-error difference.
+            brier_a = np.mean((a - yy) ** 2, axis=1)
+            brier_b = np.mean((b - yy) ** 2, axis=1)
+            deltas["brier"].extend((brier_b - brier_a).tolist())
+        remaining -= batch
+
+    result = {"valid_replicates": int(valid)}
+    if valid < int(n_bootstrap * MIN_VALID_FRACTION):
+        return {
+            **result, **empty,
+            "status": "too few valid bootstrap replicates",
+        }
+
+    for metric, values in deltas.items():
+        values = np.asarray(values, dtype=float)
+        result[f"{metric}_delta"] = float(values.mean())
+        result[f"{metric}_ci_lower"] = float(np.quantile(values, 0.025))
+        result[f"{metric}_ci_upper"] = float(np.quantile(values, 0.975))
+    result["status"] = "ok"
     return result
 
-def run_audit(n_bootstrap=1000,seed=2026):
-    if n_bootstrap<100: raise ValueError("Use at least 100 bootstrap replicates")
-    X,y=load_pima_benchmark(str(DATA))
-    subgroup=_subgroups(X.reset_index(drop=True))
-    predictions=pd.read_csv(PRED)
-    required={"seed","source_row_index","model","shift_scenario","adaptation","y_true","probability"}
-    missing=required-set(predictions.columns)
-    if missing: raise ValueError(f"Prediction file missing columns: {sorted(missing)}")
-    predictions["source_row_index"]=predictions["source_row_index"].astype(int)
-    predictions=predictions.merge(subgroup,left_on="source_row_index",right_index=True,how="left",validate="many_to_one")
-    predictions["overall_group"]="all"
-    group_specs=[("overall_group",["all"]),("age_group",["<30","30-49","50+"]),
-                 ("bmi_group",["<18.5","18.5-24.9","25-29.9",">=30"])]
-    metric_rows=[]
-    rng=np.random.default_rng(seed)
-    bootstrap_rows=[]
-    for group_col,labels in group_specs:
+
+def run_audit(n_bootstrap=1000, seed=2026):
+    if n_bootstrap < 100:
+        raise ValueError("Use at least 100 bootstrap replicates")
+
+    X, y = load_pima_benchmark(str(DATA))
+    X = X.reset_index(drop=True)
+    y = np.asarray(y, dtype=int)
+    subgroup = _subgroups(X)
+
+    predictions = pd.read_csv(PRED)
+    required = {
+        "seed", "source_row_index", "model", "shift_scenario",
+        "adaptation", "y_true", "probability",
+    }
+    missing = required - set(predictions.columns)
+    if missing:
+        raise ValueError(f"Prediction file missing columns: {sorted(missing)}")
+
+    predictions["source_row_index"] = pd.to_numeric(
+        predictions["source_row_index"], errors="raise"
+    ).astype(int)
+    if not predictions["source_row_index"].between(0, len(y) - 1).all():
+        raise ValueError("Prediction source_row_index is outside benchmark rows")
+    predictions["y_true"] = pd.to_numeric(predictions["y_true"], errors="raise").astype(int)
+    predictions["probability"] = pd.to_numeric(
+        predictions["probability"], errors="raise"
+    ).astype(float)
+    _validate_vectors(
+        predictions["y_true"].to_numpy(),
+        predictions["probability"].to_numpy(),
+    )
+    expected_labels = y[predictions["source_row_index"].to_numpy()]
+    if not np.array_equal(expected_labels, predictions["y_true"].to_numpy()):
+        raise ValueError("Prediction labels do not match their benchmark source_row_index")
+
+    predictions = predictions.merge(
+        subgroup, left_on="source_row_index", right_index=True,
+        how="left", validate="many_to_one",
+    )
+    predictions["overall_group"] = "all"
+    group_specs = [
+        ("overall_group", ["all"]),
+        ("age_group", ["<30", "30-49", "50+"]),
+        ("bmi_group", ["<18.5", "18.5-24.9", "25-29.9", ">=30"]),
+    ]
+
+    metric_rows = []
+    bootstrap_rows = []
+    rng = np.random.default_rng(seed)
+
+    for group_col, labels in group_specs:
         for label in labels:
-            subset=predictions[predictions[group_col]==label]
-            for (split,model,scenario),part in subset.groupby(["seed","model","shift_scenario"],sort=True):
-                for adaptation,arm in part.groupby("adaptation",sort=True):
-                    m=_metrics(arm["y_true"].to_numpy(),arm["probability"].to_numpy())
-                    metric_rows.append({"subgroup_type":group_col,"subgroup":label,"seed":int(split),
-                        "model":model,"shift_scenario":scenario,"adaptation":adaptation,**m})
-                wide=part.pivot(index="source_row_index",columns="adaptation",values=["y_true","probability"])
-                if not {"source_only","coral"}.issubset(set(wide["probability"].columns)):
-                    continue
-                wide=wide.dropna(subset=[("y_true","source_only"),("y_true","coral"),
-                                         ("probability","source_only"),("probability","coral")])
-                y_source=wide[("y_true","source_only")].to_numpy(dtype=int)
-                y_coral=wide[("y_true","coral")].to_numpy(dtype=int)
-                if not np.array_equal(y_source,y_coral):
+            subset = predictions[predictions[group_col] == label]
+            for (split, model, scenario), part in subset.groupby(
+                ["seed", "model", "shift_scenario"], sort=True
+            ):
+                if part.duplicated(["source_row_index", "adaptation"]).any():
+                    raise ValueError("Duplicate patient/adaptation prediction rows")
+                arms = set(part["adaptation"].unique())
+                if arms != {"source_only", "coral"}:
+                    raise ValueError(f"Expected paired source_only/coral arms, got {sorted(arms)}")
+
+                for adaptation, arm in part.groupby("adaptation", sort=True):
+                    m = _metrics(
+                        arm["y_true"].to_numpy(),
+                        arm["probability"].to_numpy(),
+                    )
+                    metric_rows.append({
+                        "subgroup_type": group_col, "subgroup": label,
+                        "seed": int(split), "model": model,
+                        "shift_scenario": scenario, "adaptation": adaptation, **m,
+                    })
+
+                wide = part.pivot(
+                    index="source_row_index", columns="adaptation",
+                    values=["y_true", "probability"],
+                ).sort_index()
+                y_source = wide[("y_true", "source_only")].to_numpy(dtype=int)
+                y_coral = wide[("y_true", "coral")].to_numpy(dtype=int)
+                if not np.array_equal(y_source, y_coral):
                     raise ValueError("Paired predictions do not share identical held-out labels")
-                result=_paired_bootstrap(y_source,wide[("probability","source_only")].to_numpy(),
-                    wide[("probability","coral")].to_numpy(),n_bootstrap,rng)
-                bootstrap_rows.append({"subgroup_type":group_col,"subgroup":label,"seed":int(split),
-                    "model":model,"shift_scenario":scenario,"n":len(y_source),
-                    "events":int(y_source.sum()),**result})
-    OUT.mkdir(parents=True,exist_ok=True)
-    metrics_path=OUT/"subgroup_metrics.csv"
-    bootstrap_path=OUT/"subgroup_paired_bootstrap.csv"
-    pd.DataFrame(metric_rows).to_csv(metrics_path,index=False)
-    pd.DataFrame(bootstrap_rows).to_csv(bootstrap_path,index=False)
+                result = _paired_bootstrap(
+                    y_source,
+                    wide[("probability", "source_only")].to_numpy(),
+                    wide[("probability", "coral")].to_numpy(),
+                    n_bootstrap, rng,
+                )
+                bootstrap_rows.append({
+                    "subgroup_type": group_col, "subgroup": label,
+                    "seed": int(split), "model": model,
+                    "shift_scenario": scenario, "n": len(y_source),
+                    "events": int(y_source.sum()), **result,
+                })
+
     if not metric_rows or not bootstrap_rows:
         raise RuntimeError("Subgroup audit produced no result rows")
-    print({"subgroup_metric_rows":len(metric_rows),"paired_bootstrap_rows":len(bootstrap_rows),
-           "bootstrap_requested":n_bootstrap,"metrics_output":str(metrics_path),
-           "bootstrap_output":str(bootstrap_path),
-           "minimum_stratum_n":MIN_N,"minimum_events_per_class":MIN_CLASS,
-           "interpretation":"Exploratory Pima strata only; not Nigerian external validation or fairness certification."})
-    return pd.DataFrame(metric_rows),pd.DataFrame(bootstrap_rows)
 
-if __name__=="__main__":
-    parser=argparse.ArgumentParser()
-    parser.add_argument("--bootstrap",type=int,default=1000)
-    parser.add_argument("--seed",type=int,default=2026)
-    args=parser.parse_args()
-    run_audit(args.bootstrap,args.seed)
+    metrics = pd.DataFrame(metric_rows)
+    bootstrap = pd.DataFrame(bootstrap_rows)
+    OUT.mkdir(parents=True, exist_ok=True)
+    metrics_path = OUT / "subgroup_metrics.csv"
+    bootstrap_path = OUT / "subgroup_paired_bootstrap.csv"
+    metrics.to_csv(metrics_path, index=False)
+    bootstrap.to_csv(bootstrap_path, index=False)
+
+    if not metrics_path.stat().st_size or not bootstrap_path.stat().st_size:
+        raise RuntimeError("Subgroup audit generated an empty output file")
+    failed = bootstrap[bootstrap["status"] != "ok"]
+    print({
+        "subgroup_metric_rows": len(metrics),
+        "paired_bootstrap_rows": len(bootstrap),
+        "bootstrap_requested_per_comparison": n_bootstrap,
+        "bootstrap_minimum_valid": int(n_bootstrap * MIN_VALID_FRACTION),
+        "comparisons_with_non_ok_status": len(failed),
+        "metrics_output": str(metrics_path),
+        "bootstrap_output": str(bootstrap_path),
+        "minimum_stratum_n": MIN_N,
+        "minimum_events_per_class": MIN_CLASS,
+        "interpretation": "Exploratory Pima strata only; not Nigerian external validation or fairness certification.",
+    })
+    if not failed.empty:
+        raise RuntimeError(
+            f"{len(failed)} paired-bootstrap comparisons did not meet validity requirements"
+        )
+    return metrics, bootstrap
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--bootstrap", type=int, default=1000)
+    parser.add_argument("--seed", type=int, default=2026)
+    args = parser.parse_args()
+    run_audit(args.bootstrap, args.seed)
