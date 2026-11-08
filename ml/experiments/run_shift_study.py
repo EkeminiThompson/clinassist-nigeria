@@ -118,7 +118,7 @@ def run_study(repeats=5,models=("logistic_regression","random_forest","hist_grad
     OUT.mkdir(parents=True,exist_ok=True)
     frame.to_csv(OUT/"synthetic_shift_runs.csv",index=False)
     pd.DataFrame(prediction_rows).to_csv(OUT/"synthetic_shift_predictions.csv",index=False)
-    metric_names=["auroc","auprc","brier","ece","aurc","selective_auroc","selective_brier"]
+    metric_names=["auroc","auprc","brier","ece","calibration_intercept_in_large","calibration_intercept","calibration_slope","aurc","selective_auroc","selective_brier"]
     summary=frame.groupby(["model","shift_scenario","adaptation"])[metric_names].agg(["mean","std"]).round(5)
     summary.to_csv(OUT/"synthetic_shift_summary.csv")
     paired=frame.pivot_table(index=["seed","model","shift_scenario"],columns="adaptation",values=metric_names)
