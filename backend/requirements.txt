@@ -19,4 +19,5 @@ pytest>=8.3.0
 pytest-asyncio>=0.24.0
 alembic>=1.14.0
 psycopg[binary]>=3.2.0
-slowapi>=0.1.9\nlimits[redis]>=3.13\n
+slowapi>=0.1.9
+limits[redis]>=3.13
