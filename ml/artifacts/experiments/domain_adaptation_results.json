@@ -1,0 +1,55 @@
+{
+  "data_source": "Public Pima Indians Diabetes (UCI) – methodological benchmark only",
+  "note": "Simulated distribution shift by median split on Age and BMI. Not real multi-hospital data.",
+  "random_seed": 42,
+  "experiments": {
+    "Age": {
+      "shift_feature": "Age",
+      "threshold": 29.0,
+      "n_source": 396,
+      "n_target": 372,
+      "source_only": {
+        "auroc": 0.7095282146160962,
+        "auprc": 0.6673476421652028,
+        "brier": 0.33863898786299784,
+        "ece": 0.34737897042468424
+      },
+      "coral_adapted": {
+        "auroc": 0.7531510175763183,
+        "auprc": 0.7252755915242295,
+        "brier": 0.22184763720378922,
+        "ece": 0.13113867238685603
+      },
+      "pooled_oracle": {
+        "auroc": 0.7767981036077706,
+        "auprc": 0.7463698253492064,
+        "brier": 0.19988507017889848,
+        "ece": 0.09420372013881065
+      }
+    },
+    "BMI": {
+      "shift_feature": "BMI",
+      "threshold": 32.0,
+      "n_source": 386,
+      "n_target": 382,
+      "source_only": {
+        "auroc": 0.7549605085725293,
+        "auprc": 0.7183942960226479,
+        "brier": 0.37997172356653636,
+        "ece": 0.40223278704573506
+      },
+      "coral_adapted": {
+        "auroc": 0.7621157497867187,
+        "auprc": 0.7307966254976995,
+        "brier": 0.21117568717501,
+        "ece": 0.12355878778592379
+      },
+      "pooled_oracle": {
+        "auroc": 0.8080193741915953,
+        "auprc": 0.7703075680365976,
+        "brier": 0.1904186465477245,
+        "ece": 0.11177160321088175
+      }
+    }
+  }
+}
