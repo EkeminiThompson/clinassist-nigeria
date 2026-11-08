@@ -25,7 +25,9 @@ def register(request:Request,payload:Register,db:Session=Depends(get_db)):
     email=str(payload.email).lower()
     if db.query(User).filter(User.email==email).first():
         raise HTTPException(409,"Account already exists")
-    user=User(email=email,full_name=payload.full_name.strip(),hashed_password=hash_password(payload.password),role="clinician")
+    # Self-service accounts receive least privilege. A trusted administrator
+    # must explicitly provision clinical/research permissions.
+    user=User(email=email,full_name=payload.full_name.strip(),hashed_password=hash_password(payload.password),role="viewer")
     db.add(user);db.commit();db.refresh(user)
     record_event(db,user,"account.registered","user")
     return user
