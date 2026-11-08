@@ -83,7 +83,8 @@ def run_audit(n_bootstrap=1000,seed=2026):
     if missing: raise ValueError(f"Prediction file missing columns: {sorted(missing)}")
     predictions["source_row_index"]=predictions["source_row_index"].astype(int)
     predictions=predictions.merge(subgroup,left_on="source_row_index",right_index=True,how="left",validate="many_to_one")
-    group_specs=[("age_group",["<30","30-49","50+"]),
+    predictions["overall_group"]="all"
+    group_specs=[("overall_group",["all"]),("age_group",["<30","30-49","50+"]),
                  ("bmi_group",["<18.5","18.5-24.9","25-29.9",">=30"])]
     metric_rows=[]
     rng=np.random.default_rng(seed)
