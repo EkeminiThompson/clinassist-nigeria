@@ -36,7 +36,7 @@ def run_audit(n_bootstrap=1000, seed=2026):
     demo["y_reference"] = y.to_numpy()
     demo["age_group"] = pd.cut(demo["Age"], [-np.inf, 29, 49, np.inf],
                                labels=["<30", "30-49", "50+"])
-    demo["bmi_group"] = pd.cut(demo["BMI"], [-np.inf, 18.5, 25, 30, np.inf],
+    demo["BMI_for_group"] = demo["BMI"].replace(0, np.nan)\n    demo["bmi_group"] = pd.cut(demo["BMI_for_group"], [-np.inf, 18.5, 25, 30, np.inf],
                                right=False,
                                labels=["<18.5", "18.5-24.9", "25-29.9", ">=30"])
     predictions = predictions.merge(demo, on="source_row_index", how="left", validate="many_to_one")
