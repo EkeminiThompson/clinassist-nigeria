@@ -6,6 +6,9 @@ import sys
 from pathlib import Path
 
 import pytest
+from backend.app.services.prediction import DATA_PATH
+
+requires_benchmark_data = pytest.mark.skipif(not DATA_PATH.exists(), reason='Pima benchmark CSV is not distributed in this repository; add the verified dataset locally to run inference tests.')
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -19,6 +22,7 @@ def test_risk_category():
     assert risk_category(0.8) == "high"
 
 
+@requires_benchmark_data
 def test_predict_high_risk_case():
     features = {
         "Pregnancies": 6,
@@ -41,6 +45,7 @@ def test_predict_high_risk_case():
     assert result["uncertainty"] is not None
 
 
+@requires_benchmark_data
 def test_predict_low_risk_case():
     features = {
         "Pregnancies": 1,
