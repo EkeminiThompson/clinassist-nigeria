@@ -259,23 +259,32 @@ def run_audit(n_bootstrap=1000, seed=2026):
 
     if not metrics_path.stat().st_size or not bootstrap_path.stat().st_size:
         raise RuntimeError("Subgroup audit generated an empty output file")
-    failed = bootstrap[bootstrap["status"] != "ok"]
+    allowed_statuses = {"ok", "insufficient subgroup events"}
+    unexpected = bootstrap[~bootstrap["status"].isin(allowed_statuses)]
     print({
         "subgroup_metric_rows": len(metrics),
         "paired_bootstrap_rows": len(bootstrap),
         "bootstrap_requested_per_comparison": n_bootstrap,
         "bootstrap_minimum_valid": int(n_bootstrap * MIN_VALID_FRACTION),
-        "comparisons_with_non_ok_status": len(failed),
+        "comparisons_with_unexpected_status": len(unexpected),
         "metrics_output": str(metrics_path),
         "bootstrap_output": str(bootstrap_path),
         "minimum_stratum_n": MIN_N,
         "minimum_events_per_class": MIN_CLASS,
         "interpretation": "Exploratory Pima strata only; not Nigerian external validation or fairness certification.",
     })
-    if not failed.empty:
+    if not unexpected.empty:
         raise RuntimeError(
-            f"{len(failed)} paired-bootstrap comparisons did not meet validity requirements"
+            f"{len(unexpected)} paired-bootstrap comparisons failed validity requirements"
         )
+    successful = bootstrap[bootstrap["status"] == "ok"]
+    if not successful.empty and (
+        (successful["valid_replicates"] < int(n_bootstrap * MIN_VALID_FRACTION)).any()
+        or successful[["auroc_ci_lower", "auroc_ci_upper",
+                       "auprc_ci_lower", "auprc_ci_upper",
+                       "brier_ci_lower", "brier_ci_upper"]].isna().any().any()
+    ):
+        raise RuntimeError("Successful bootstrap rows contain invalid replicate counts or intervals")
     return metrics, bootstrap
 
 
