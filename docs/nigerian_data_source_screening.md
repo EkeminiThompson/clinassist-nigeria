@@ -1,0 +1,25 @@
+# Nigerian diabetes data-source screening log
+
+**Last reviewed: 2026-11-08. No candidate below is currently accepted as authentic, ethically approved external-validation data.**
+
+| Candidate | Publicly stated information | Verification status | Decision |
+|---|---|---|---|
+| Mendeley DOI 10.17632/n2fd27pkg9.1, labelled UITH + General Hospital Offa | Claims 800 patients, 768 retained, and eight classic Pima predictors | Repository-level inspection found the released 768-row file identical in schema, row count, class balance and values to the public Pima benchmark; no site identifiers | Reject as Nigerian external validation |
+| Mendeley DOI 10.17632/ksdk5m939c.1 | Public description claims 1,500 type-2 diabetes records and nine demographic/clinical fields | Public landing-page description does not establish named recruiting hospitals, patient-level provenance, site labels, diagnostic adjudication, ethics approval, consent/waiver, or data-use permission | Unverified lead only; do not train/evaluate until authors supply documentary provenance and ethics evidence |
+| Mendeley DOI 10.17632/hyy9ctvyfd.1 | 158 Lagos tertiary-hospital survey respondents on oral-health seeking behaviour and glycaemic control | Different research question and outcome; not a diabetes diagnostic cohort. Download/secondary-use permissions and variable-level suitability still require review | Not suitable for current diagnostic external validation |
+| Federal Ministry of Health Health Partners' Projects & Data Mapping Platform | Research-data user registration and access for legitimate research | Access requires approved account; no specific eligible diabetes dataset confirmed | Explore as a formal institutional route, not as available data |
+| Clinical Data Repository (CDR), CIHP | Public site describes a repository spanning 150+ facilities | Login/access restricted; dataset availability, governance, provenance and permission for this project unverified | Explore only through a formal institutional partnership and data agreement |
+| ESUTH dataset referenced in prior repository provenance work | A 2023 study was identified | Dataset not accessible to the project; cohort definition, site metadata and permissions not verified | Pending direct author/institutional enquiry |
+
+## Verification checklist for any proposed dataset
+
+Before accepting a dataset, obtain and archive in the institution's controlled records:
+- Named source hospital(s), departments, collection dates, sampling frame and cohort flow.
+- Signed statement from the data custodian or PI confirming the records are genuine observations from those sites and not synthetic, copied, resampled or relabelled benchmark data.
+- Original study protocol, ethics committee name, approval/reference number, approval date, approved consent/waiver and evidence that secondary AI use is covered.
+- Data-use agreement, licence, controller/processor roles, permitted purposes, retention, transfer and publication conditions.
+- Site identifiers or a documented site-level partition key for external validation.
+- Outcome definition, measurement units, missingness, exclusion rules, duplicate handling, patient-level de-duplication and codebook.
+- Independent provenance checks against the known Pima benchmark and other publicly circulating datasets.
+
+A public repository licence is not proof that the underlying human-subjects collection had valid ethics approval or that a new research purpose is covered. Do not infer Nigerian provenance from a dataset title, author affiliation, or institution named in a description.
