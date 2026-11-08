@@ -8,21 +8,21 @@
 | Component | Status | Evidence / next action |
 |---|---|---|
 | Title | Drafted | Retains the agreed title without naming synthetic data in the title. The methods must still describe controlled synthetic perturbations transparently. |
-| Abstract | Drafted | Update after subgroup audit and final figures. |
+| Abstract | Drafted | Subgroup results have been incorporated; finalise after calibration-figure and reporting review. |
 | Research question | Drafted | Focuses on calibration, model-specific CORAL effects and negative transfer under controlled shifts. |
 | Related work | Partial | Core references added; complete a reproducible literature search and compare directly with recent domain-adaptation and clinical calibration studies. |
 | Dataset provenance | Documented | OpenML 37 v1, 768 rows, eight predictors, 500/268 labels, SHA-256 recorded. Reconfirm source terms and appropriate institutional determination before submission. |
 | Nigerian data claim | Correctly excluded | Pima is methodological only. The UITH/Offa-labelled Pima-identical deposit is not independent Nigerian validation. |
 | Methods | Drafted | Confirm all hyperparameters, preprocessing, calibration folds, shift formulae and random seeds against the final code release. |
-| Baseline results | Verified in run 42464788999 artifact | Five-fold comparison table included. |
-| Repeated shift results | Verified in run 42464788999 artifact | 210 evaluations, five seeds; results and paired differences included. |
-| TreeSHAP stability | Verified in run 42464788999 artifact | 100 explanations, one seed; RBO table included. |
+| Baseline results | Verified in run 42472051266 artifact | Five-fold comparison table included. |
+| Repeated shift results | Verified in run 42472051266 artifact | 210 evaluations, five seeds; results and paired differences included. |
+| TreeSHAP stability | Verified in run 42472051266 artifact | 100 explanations, one seed; RBO table included. |
 | Subgroup metrics | Completed | Run 42472051266 produced 1,638 rows; sparse strata retain denominators and suppress unstable estimates. See `docs/paper1_subgroup_audit_results.md`. |
 | Paired-bootstrap intervals | Completed | 819 paired comparisons; 609 eligible intervals; 210 sparse comparisons suppressed. All successful rows had >=900 valid draws and finite ordered intervals. |
 | Calibration plots | Provisional | Descriptive eight-quantile-bin curves generated for reference and combined-severe scenarios; no confidence bands. Final uncertainty-aware calibration reporting remains outstanding. |
 | Figures | Provisional | Five benchmark figures plus three calibration plots generated locally from verified artifact outputs. Final journal styling, figure-source scripts and repository/supplementary inclusion remain pending. |
 | Tables | Drafted | Baseline, paired AUROC deltas and combined-severe calibration tables included. Reconcile after final audit. |
-| Discussion | Drafted | Revisit after subgroup results and calibration figures are final. |
+| Discussion | Drafted | Updated with subgroup results and calibration limitations; revisit after supervisor review. |
 | Limitations | Drafted | Explicitly states no Nigerian cohort, no prospective validation, five overlapping split seeds and no clinical utility evaluation. |
 | Reproducibility | Improved | Run 42472051266 passed backend, frontend and research jobs on code commit `2d3abe3`; artifact ID `13613489987`. Documentation commits followed the run and should receive a final push-triggered CI confirmation. Immutable release remains pending. |
 | TRIPOD+AI | Pending | Complete the 27-item reporting checklist and abstract checklist; report missing items rather than imply compliance. |
