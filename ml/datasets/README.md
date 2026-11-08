@@ -1,5 +1,11 @@
 # Benchmark dataset setup
 
-The Pima Indians Diabetes CSV is intentionally not committed in this repository. Obtain the permitted public dataset from its authoritative source, verify its provenance and license, and place the CSV at `ml/datasets/diabetes_dataset.csv` with the expected columns: `Pregnancies`, `Glucose`, `BloodPressure`, `SkinThickness`, `Insulin`, `BMI`, `DiabetesPedigreeFunction`, `Age`, `Outcome`.
+The raw benchmark is deliberately not committed to Git. To fetch OpenML dataset 37 and validate the expected Pima schema, sample count and class balance:
 
-The prediction service cannot train its baseline until this file is supplied. The repository does not generate synthetic patient records or silently substitute another dataset. In CI, inference tests are skipped when the benchmark CSV is absent; all other unit and import checks still run.
+```bash
+PYTHONPATH=. python -m ml.datasets.download_pima
+```
+
+The script writes `diabetes_dataset.csv` and `pima_manifest.json` locally. The manifest records OpenML dataset/version metadata, retrieval time, class counts and a SHA-256 checksum. Review the upstream dataset terms and retain the manifest with any experiment archive. If the upstream schema or counts change, the script stops rather than silently accepting a different dataset.
+
+The Pima cohort comprises adult women of Pima heritage. It is a historical methodological benchmark only, not a representative Nigerian cohort or external validation dataset. Never describe synthetic shift experiments as Nigerian clinical validation.

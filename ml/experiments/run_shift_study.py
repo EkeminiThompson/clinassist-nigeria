@@ -79,7 +79,13 @@ def run_study(repeats=5,models=("logistic_regression","random_forest","hist_grad
     frame.to_csv(OUT/"synthetic_shift_runs.csv",index=False)
     summary=frame.groupby(["model","scenario"]).agg({c:["mean","std"] for c in ["auroc","auprc","brier","ece","aurc","selective_auroc","selective_brier"]}).round(5)
     summary.to_csv(OUT/"synthetic_shift_summary.csv")
-    artifact={"study":"controlled_synthetic_covariate_and_missingness_shift","data_source":"public Pima benchmark only","external_validation":False,"target_labels_used_for_adaptation":False,"target_covariates_used_for_adaptation":"CORAL scenario only","repeats":repeats,"models":list(models),"missing_rate":missing_rate,"seed_range":[42,41+repeats],"results":rows,"summary_csv":"synthetic_shift_summary.csv","raw_runs_csv":"synthetic_shift_runs.csv"}
+    paired=frame.pivot_table(index=["seed","model"],columns="scenario",values=["auroc","auprc","brier","ece","aurc","selective_auroc","selective_brier"])
+    deltas=[]
+    for metric in ["auroc","auprc","brier","ece","aurc","selective_auroc","selective_brier"]:
+        delta=paired[(metric,"coral")]-paired[(metric,"source_only")]
+        for (seed,model_name),value in delta.items(): deltas.append({"seed":seed,"model":model_name,"metric":metric,"coral_minus_source_only":float(value)})
+    pd.DataFrame(deltas).to_csv(OUT/"synthetic_shift_paired_differences.csv",index=False)
+    artifact={"study":"controlled_synthetic_covariate_and_missingness_shift","data_source":"public Pima benchmark only","external_validation":False,"target_labels_used_for_adaptation":False,"target_covariates_used_for_adaptation":"CORAL scenario only","repeats":repeats,"models":list(models),"missing_rate":missing_rate,"seed_range":[42,41+repeats],"results":rows,"summary_csv":"synthetic_shift_summary.csv","raw_runs_csv":"synthetic_shift_runs.csv","paired_differences_csv":"synthetic_shift_paired_differences.csv","interpretation_note":"Mean and standard deviation across repeated random splits describe split variability, not independent external validation or patient-level confidence intervals."}
     (OUT/"synthetic_shift_study.json").write_text(json.dumps(_json_safe(artifact),indent=2,allow_nan=False))
     return artifact
 

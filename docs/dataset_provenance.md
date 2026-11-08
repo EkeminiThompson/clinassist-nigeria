@@ -24,7 +24,11 @@
 
 **Conclusion:** The deposit is a re-packaged version of the well-known public Pima dataset. It cannot support claims of Nigerian multi-hospital domain adaptation.
 
-## 3. Research Implications
+## 3. Reproducible benchmark retrieval
+
+The repository provides `ml.datasets.download_pima`, which fetches OpenML dataset ID 37, validates the eight expected feature aliases, 768 rows and 500/268 class counts, and writes a local SHA-256 provenance manifest. The CSV is not committed. The benchmark's source population is adult women of Pima heritage; it is not a Nigerian cohort.
+
+## 4. Research Implications
 
 True hospital-level domain adaptation experiments between Nigerian teaching hospitals cannot currently be performed with the available data.  
 
@@ -37,7 +41,7 @@ The project therefore proceeds as a **methodological and systems research contri
 
 All experimental results will be explicitly labelled with the data source used. No claim of external clinical validation or real multi-hospital Nigerian performance will be made until verified multi-site data are available.
 
-## 4. Data Governance Rules (Enforced)
+## 5. Data Governance Rules (Enforced)
 
 - Raw patient-level data are never committed to the public or private GitHub repository.
 - Only de-identified, authorised, and properly licensed data may be used for model development.
@@ -45,7 +49,7 @@ All experimental results will be explicitly labelled with the data source used. 
 - Model cards and experiment logs record exact data version, preprocessing, and random seeds.
 - The system is intended to support qualified healthcare professionals; it does not diagnose or replace clinical judgment.
 
-## 5. Next Data Actions
+## 6. Next Data Actions
 
 1. Continue monitoring for verified multi-site Nigerian diabetes cohorts with hospital identifiers and proper ethics documentation.
 2. Maintain an isolated data environment for the original ESUTH research dataset pending access.
