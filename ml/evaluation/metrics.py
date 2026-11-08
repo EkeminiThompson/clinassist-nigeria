@@ -4,6 +4,8 @@ All metrics operate on held-out predictions. They do not imply clinical validity
 """
 from __future__ import annotations
 import numpy as np
+from scipy.optimize import brentq, minimize
+from scipy.special import expit, logit
 from sklearn.metrics import (average_precision_score,brier_score_loss,confusion_matrix,
     f1_score,precision_score,recall_score,roc_auc_score)
 
@@ -35,9 +37,37 @@ def expected_calibration_error(y_true,y_prob,n_bins=10):
         if mask.any(): total+=float(mask.mean()*abs(y[mask].mean()-p[mask].mean()))
     return float(total)
 
+def calibration_intercept_slope(y_true,y_prob):
+    """Return calibration-in-the-large intercept and joint logistic slope/intercept.
+
+    The in-the-large intercept uses the original model logit as an offset (ideal 0).
+    The joint slope/intercept diagnose over/under-dispersion (ideal slope 1, intercept 0).
+    """
+    y,p=_inputs(y_true,y_prob)
+    if np.unique(y).size<2:
+        return {"calibration_intercept_in_large":float("nan"),
+                "calibration_intercept":float("nan"),"calibration_slope":float("nan")}
+    lp=logit(np.clip(p,1e-8,1-1e-8))
+    try:
+        target=float(y.mean())
+        intercept_large=brentq(lambda a: float(expit(lp+a).mean()-target),-30,30)
+    except (ValueError,RuntimeError):
+        intercept_large=float("nan")
+    def objective(beta):
+        z=beta[0]+beta[1]*lp
+        return float(np.logaddexp(0,z).sum()-(y*z).sum()+1e-8*np.dot(beta,beta))
+    fit=minimize(objective,np.array([0.0,1.0]),method="BFGS")
+    if not fit.success and not np.isfinite(fit.fun):
+        intercept,slope=float("nan"),float("nan")
+    else:
+        intercept,slope=map(float,fit.x)
+    return {"calibration_intercept_in_large":float(intercept_large),
+            "calibration_intercept":intercept,"calibration_slope":slope}
+
 def compute_calibration_metrics(y_true,y_prob):
     y,p=_inputs(y_true,y_prob)
-    return {"brier":float(brier_score_loss(y,p)),"ece":expected_calibration_error(y,p)}
+    return {"brier":float(brier_score_loss(y,p)),
+        "ece":expected_calibration_error(y,p),**calibration_intercept_slope(y,p)}
 
 def risk_coverage_curve(y_true,y_prob,uncertainty):
     y,p=_inputs(y_true,y_prob); u=np.asarray(uncertainty,dtype=float).reshape(-1)
