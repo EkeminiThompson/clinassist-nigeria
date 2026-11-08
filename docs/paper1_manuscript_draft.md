@@ -132,7 +132,52 @@ These changes are descriptive across five split seeds. They do not establish a u
 
 Mean rank-biased overlap for random forest was 0.994 at noise SD 0.01, 0.974 at SD 0.05 and 0.963 at SD 0.10. For XGBoost, corresponding values were 0.971, 0.965 and 0.952. Stability declined as perturbation magnitude increased. The single-seed design and synthetic perturbation procedure limit interpretation.
 
-### 4.4 Subgroup results
+### 4.4 Summary tables and figure legends
+
+**Table 1. Five-fold benchmark performance**
+
+| Model | AUROC | AUPRC | Brier | ECE | Sensitivity | Specificity |
+|---|---:|---:|---:|---:|---:|---:|
+| Logistic regression | 0.835 | 0.707 | 0.157 | 0.036 | 0.571 | 0.880 |
+| Random forest | 0.834 | 0.698 | 0.157 | 0.040 | 0.563 | 0.864 |
+| Gradient boosting | 0.827 | 0.693 | 0.168 | 0.084 | 0.627 | 0.826 |
+| XGBoost | 0.825 | 0.692 | 0.164 | 0.064 | 0.616 | 0.836 |
+| RBF SVM | 0.821 | 0.697 | 0.164 | 0.055 | 0.541 | 0.868 |
+
+**Table 2. Mean paired CORAL-minus-source-only AUROC differences across five split seeds**
+
+| Scenario | Logistic regression | Random forest | Hist. gradient boosting |
+|---|---:|---:|---:|
+| Reference | -0.0019 | -0.0021 | +0.0019 |
+| Covariate mild | -0.0011 | +0.0021 | +0.0050 |
+| Covariate severe | -0.0004 | +0.0373 | +0.0437 |
+| MCAR-like 10% | +0.0011 | -0.0033 | -0.0006 |
+| MAR-like 10% | -0.0019 | -0.0018 | +0.0007 |
+| Combined mild | +0.0026 | +0.0057 | +0.0112 |
+| Combined severe | -0.0007 | +0.0362 | +0.0505 |
+
+**Table 3. Calibration metrics under combined severe controlled shift**
+
+| Model | Adaptation | Brier | ECE |
+|---|---|---:|---:|
+| Logistic regression | Source-only | 0.2450 | 0.2900 |
+| Logistic regression | CORAL | 0.1547 | 0.0643 |
+| Random forest | Source-only | 0.2210 | 0.2172 |
+| Random forest | CORAL | 0.1540 | 0.0765 |
+| Hist. gradient boosting | Source-only | 0.2269 | 0.2094 |
+| Hist. gradient boosting | CORAL | 0.1638 | 0.0754 |
+
+**Figure 1.** Five-fold baseline discrimination (AUROC and AUPRC) across the five benchmark classifiers.
+
+**Figure 2.** Mean paired AUROC difference (CORAL minus source-only) across the seven controlled shift scenarios and three model classes. Positive values favour CORAL; negative values indicate negative transfer.
+
+**Figure 3.** Brier score for source-only and CORAL models under combined severe covariate shift and MAR-like missingness. Lower values indicate better probabilistic accuracy.
+
+**Figure 4.** ECE for source-only and CORAL models under combined severe controlled shift. Lower values indicate smaller average calibration error; ECE remains bin-dependent.
+
+**Figure 5.** Mean TreeSHAP feature-rank RBO across three standardized perturbation magnitudes. Values are from 100 explained examples and one random seed.
+
+### 4.5 Subgroup results
 
 No subgroup results are available from the latest completed workflow. The subgroup and paired-bootstrap audit was cancelled before producing the required CSV outputs. Results must be added only after a successful rerun and review of subgroup denominators, event counts, paired resampling and confidence intervals.
 
