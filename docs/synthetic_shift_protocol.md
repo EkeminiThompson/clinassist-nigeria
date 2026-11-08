@@ -1,11 +1,11 @@
-# Reproducible synthetic-shift study
+# Factorial controlled synthetic-shift study
 
-Run only after placing a verified, licensed public Pima CSV at `ml/datasets/diabetes_dataset.csv`:
+Run after fetching and verifying the local benchmark CSV:
 
 ```bash
-PYTHONPATH=. python -m ml.experiments.run_shift_study --repeats 5 --missing-rate 0.10
+PYTHONPATH=. python -m ml.experiments.run_shift_study --repeats 5
 ```
 
-The experiment performs repeated stratified source/held-out splits and compares source-only models with CORAL using *unlabelled held-out target covariates*. Target labels are used only after prediction for evaluation. Preprocessing is fitted on source training data only. The shifted cohort is created by a deterministic covariate perturbation and random feature masking; it is a synthetic stress test, not a hospital cohort, external validation, or simulated Nigerian clinical population.
+The protocol compares source-only training with CORAL across an unshifted reference, mild/severe covariate shifts, MCAR-like missingness, glucose-dependent MAR-like missingness, and combined scenarios. Preprocessing and sigmoid calibration are fitted on source-training data only. CORAL sees only held-out target covariates; held-out labels are used only after prediction for evaluation.
 
-Outputs are written to `ml/artifacts/experiments/`: per-repeat metrics, grouped mean/standard deviation, and a JSON provenance manifest. The script intentionally does not publish headline performance claims. Report uncertainty intervals and all seeds when interpreting results. This is an initial controlled protocol, not proof of domain adaptation benefit.
+Outputs include per-split metrics, mean/standard-deviation summaries and paired CORAL-minus-source-only differences. Repeated-split variability is not a patient-level confidence interval. The benchmark is historical Pima data, not a Nigerian cohort; synthetic stress tests are not external validation. Negative transfer must be reported.
