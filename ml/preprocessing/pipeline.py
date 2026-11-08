@@ -32,19 +32,36 @@ ZERO_AS_MISSING = ["Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI"
 
 
 class ZeroToMissingTransformer(BaseEstimator, TransformerMixin):
-    """Replace physiologically impossible zeros with NaN."""
+    """Replace physiologically impossible zeros with NaN.
+    Accepts both pandas DataFrame and numpy ndarray.
+    """
 
     def __init__(self, columns: List[str]):
         self.columns = columns
+        self.feature_names_in_: Optional[List[str]] = None
 
-    def fit(self, X: pd.DataFrame, y=None):
+    def fit(self, X, y=None):
+        if isinstance(X, pd.DataFrame):
+            self.feature_names_in_ = list(X.columns)
+        else:
+            self.feature_names_in_ = FEATURE_COLUMNS
         return self
 
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
-        X = X.copy()
+    def transform(self, X):
+        if isinstance(X, pd.DataFrame):
+            X = X.copy()
+            for col in self.columns:
+                if col in X.columns:
+                    X.loc[X[col] == 0, col] = np.nan
+            return X
+        # ndarray path
+        X = np.asarray(X, dtype=float).copy()
+        names = self.feature_names_in_ or FEATURE_COLUMNS
         for col in self.columns:
-            if col in X.columns:
-                X.loc[X[col] == 0, col] = np.nan
+            if col in names:
+                idx = names.index(col)
+                if idx < X.shape[1]:
+                    X[X[:, idx] == 0, idx] = np.nan
         return X
 
 
