@@ -28,6 +28,11 @@
 - Ask for a catalogue search covering diabetes mellitus, NCDs, HbA1c, fasting/random glucose, outpatient clinics, tertiary hospitals and state-level facility data.
 - Treat dataset descriptions as leads only; obtain site-specific custodian confirmation and ethics/DUA documentation.
 
+### WHO NCD microdata repository / Nigeria STEPS
+- WHO Nigeria NCD surveillance page: https://www.who.int/teams/noncommunicable-diseases/surveillance/data/nigeria
+- It lists the 2003 Nigeria STEPS country report. The WHO STEPS instrument includes raised blood glucose and other biological risk factors, but the current public WHO STEPS microdata catalogue search did not surface a Nigeria STEPS microdata record.
+- Decision: use the 2003 report for historical context only. Do not assume respondent-level Nigeria STEPS microdata is publicly downloadable. Ask WHO and the Federal Ministry of Health whether archived microdata exists and what approvals/access terms apply.
+
 ### NHREC ethics guidance and e-portal
 - NHREC registered HREC directory: https://nhrec.gov.ng/registered-ethics-committees/
 - NHREC proposal guidance: https://nhrec.gov.ng/services/proposal-guidance/
