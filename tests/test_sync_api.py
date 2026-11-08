@@ -16,7 +16,7 @@ def test_sync_is_idempotent_and_rejects_clinical_payload():
         try: yield db
         finally: db.close()
     app.dependency_overrides[get_db]=override_db
-    db=Session();user=User(email="sync-test@example.org",full_name="Sync Test",hashed_password=hash_password("test-password-long"));db.add(user);db.commit();db.refresh(user);uid=user.id;db.close()
+    db=Session();user=User(email="sync-test@example.org",full_name="Sync Test",hashed_password=hash_password("test-password-long"),role="clinician");db.add(user);db.commit();db.refresh(user);uid=user.id;db.close()
     token=create_access_token(uid);client=TestClient(app);headers={"Authorization":f"Bearer {token}"}
     body={"records":[{"client_id":"offline_12345678","record_type":"prediction","created_at":datetime.now(timezone.utc).isoformat()}]}
     first=client.post("/api/v1/sync/batch",json=body,headers=headers)
