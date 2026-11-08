@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from backend.app.audit import record_event
 from backend.app.db import get_db
 from backend.app.models import User,SyncReceipt
-from backend.app.security import get_current_user
+from backend.app.security import require_roles
 router=APIRouter(prefix="/api/v1/sync",tags=["offline-sync"])
 class Record(BaseModel):
     model_config=ConfigDict(extra="forbid")
@@ -16,7 +16,7 @@ class Record(BaseModel):
 class Batch(BaseModel):
     records:list[Record]=Field(max_length=50)
 @router.post("/batch")
-def sync(batch:Batch,db:Session=Depends(get_db),user:User=Depends(get_current_user)):
+def sync(batch:Batch,db:Session=Depends(get_db),user:User=Depends(require_roles("admin","clinician","researcher"))):
     acknowledged=[];new_ids=[];duplicates=[]
     seen=set()
     for record in batch.records:

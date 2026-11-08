@@ -29,7 +29,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # ML artifacts that may contain sensitive information
-ml/artifacts/models/
+ml/artifacts/models/\nml/artifacts/experiments/
 ml/artifacts/predictions/
 *.pkl
 *.joblib
