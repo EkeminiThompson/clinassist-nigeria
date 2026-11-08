@@ -1,0 +1,64 @@
+{
+  "data_source": "Public Pima Indians Diabetes (UCI) – methodological benchmark only",
+  "note": "Not Nigerian multi-hospital data. See docs/dataset_provenance.md",
+  "n_samples": 768,
+  "n_splits": 5,
+  "random_seed": 42,
+  "results": {
+    "logistic_regression": {
+      "auroc": 0.8349402985074627,
+      "auprc": 0.706744955413949,
+      "precision": 0.7183098591549296,
+      "recall": 0.5708955223880597,
+      "f1": 0.6361746361746362,
+      "sensitivity": 0.5708955223880597,
+      "specificity": 0.88,
+      "brier": 0.15708721726138386,
+      "ece": 0.03601902540289883
+    },
+    "random_forest": {
+      "auroc": 0.8341865671641792,
+      "auprc": 0.6977130130481286,
+      "precision": 0.6894977168949772,
+      "recall": 0.5634328358208955,
+      "f1": 0.6201232032854209,
+      "sensitivity": 0.5634328358208955,
+      "specificity": 0.864,
+      "brier": 0.15742907381265517,
+      "ece": 0.03978972568994198
+    },
+    "gradient_boosting": {
+      "auroc": 0.8265373134328358,
+      "auprc": 0.6927345133314565,
+      "precision": 0.6588235294117647,
+      "recall": 0.6268656716417911,
+      "f1": 0.6424474187380497,
+      "sensitivity": 0.6268656716417911,
+      "specificity": 0.826,
+      "brier": 0.16756215201462377,
+      "ece": 0.08389891652849782
+    },
+    "xgboost": {
+      "auroc": 0.8246641791044778,
+      "auprc": 0.691974598313646,
+      "precision": 0.6680161943319838,
+      "recall": 0.6156716417910447,
+      "f1": 0.6407766990291263,
+      "sensitivity": 0.6156716417910447,
+      "specificity": 0.836,
+      "brier": 0.16433711349964142,
+      "ece": 0.06424869906428891
+    },
+    "svm_rbf": {
+      "auroc": 0.8210671641791044,
+      "auprc": 0.696711209432186,
+      "precision": 0.6872037914691943,
+      "recall": 0.5410447761194029,
+      "f1": 0.605427974947808,
+      "sensitivity": 0.5410447761194029,
+      "specificity": 0.868,
+      "brier": 0.16424587205273436,
+      "ece": 0.05479509248170221
+    }
+  }
+}
