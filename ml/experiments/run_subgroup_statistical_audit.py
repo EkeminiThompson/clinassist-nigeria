@@ -229,6 +229,8 @@ def run_audit(n_bootstrap=1000, seed=2026):
                     index="source_row_index", columns="adaptation",
                     values=["y_true", "probability"],
                 ).sort_index()
+                if wide.isna().any().any():
+                    raise ValueError("Source-only and CORAL arms must contain identical patient rows")
                 y_source = wide[("y_true", "source_only")].to_numpy(dtype=int)
                 y_coral = wide[("y_true", "coral")].to_numpy(dtype=int)
                 if not np.array_equal(y_source, y_coral):
