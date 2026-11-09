@@ -1,50 +1,42 @@
 # Research Gap and Novelty Assessment
 **ClinAssist Nigeria**  
-**Last updated:** 2026-11-08
+**Last updated:** 2026-11-09
 
-## 1. Primary Research Question (Refined)
+> **Authoritative novelty document:** see [`docs/novelty_statement.md`](novelty_statement.md). This file summarises the gap; the novelty statement is binding.
 
-Given the current data reality (no verified multi-hospital Nigerian diabetes cohort with site identifiers is accessible), the research focuses on:
+## 1. Primary research question (refined)
 
-> Can a confidence-aware, missingness-robust domain-adaptation and selective-prediction framework improve the reliability and interpretability of diabetes risk models under controlled distribution shift, while remaining deployable offline in resource-constrained clinical environments?
+Under controlled covariate and missingness shift on a public clinical benchmark, when does unsupervised CORAL adaptation improve or harm discrimination, calibration and selective prediction relative to source-only training, and how stable are local TreeSHAP attributions under perturbation?
 
-This is a methodological + systems contribution that is directly transferable to future authentic multi-site Nigerian data.
+## 2. Core literature gap
 
-## 2. Literature Gaps (2020–Nov 2026)
+Unsupervised domain adaptation (including CORAL) is frequently evaluated on discrimination alone. Joint reporting of:
 
-| Gap | Evidence from Literature | Relevance |
-|-----|--------------------------|-----------|
-| Uncertainty-aware selective prediction under distribution shift for tabular clinical diabetes models | Conformal prediction and selective classification exist, but limited joint evaluation with domain adaptation on small clinical tabular data | High |
-| Explanation stability (SHAP consistency) across domain-adapted models | Most XAI work evaluates single models; stability under shift is under-studied | High |
-| Missingness-aware domain adaptation for small clinical datasets | DAMS and MNAR methods exist; few practical pipelines for n < 1000 with clinical constraints | Medium-High |
-| Offline-first clinical decision support that embeds the above ML components | Offline PWAs exist for African health settings; rarely coupled with rigorous adaptation + uncertainty research | High for systems contribution |
-| Evaluations explicitly designed for Nigerian / African teaching-hospital constraints (small n, intermittent connectivity, limited labels) | Most domain-adaptation work uses large US/European EHR | High |
+- calibration (Brier, ECE, intercept/slope),
+- selective / risk-coverage metrics after adaptation,
+- explanation-rank stability,
+- and explicit negative or null transfer,
 
-## 3. What Is Not Claimed as Novel
+under a leakage-safe, repeated-split protocol on small tabular clinical data remains under-documented.
 
-- Using SHAP, XGBoost, or basic domain adaptation techniques in isolation.
-- Building a diabetes prediction web application.
-- Offline PWA engineering by itself.
-- Any performance numbers derived from the re-packaged Pima data presented as Nigerian hospital results.
+## 3. What is not claimed
 
-## 4. Defensible Contribution
+- Novelty of CORAL, SHAP, XGBoost or offline PWAs in isolation.
+- Nigerian multi-hospital external validation (data unavailable).
+- Clinical deployment readiness or causal feature interpretations.
 
-A complete, reproducible research software framework that:
+## 4. Defensible contributions (summary)
 
-1. Implements and comparatively evaluates domain-adaptation methods suitable for small tabular clinical data.
-2. Integrates calibrated uncertainty quantification and selective prediction (abstention when uncertainty or shift is high).
-3. Quantifies explanation stability under controlled shift.
-4. Provides missing-data robustness experiments.
-5. Delivers a production-oriented, offline-capable clinical interface designed for Nigerian teaching-hospital infrastructure constraints.
-6. Maintains strict provenance, experiment tracking, and data-governance standards so that the same pipeline can be applied to future authenticated multi-site African cohorts without modification of the scientific claims.
+**A (primary).** Model- and scenario-stratified evaluation showing CORAL improves discrimination and especially calibration only under selected severe controlled shifts; neutral or adverse under milder/missingness-only conditions.
 
-## 5. Success Criteria for the Research
+**B.** TreeSHAP rank stability under controlled perturbation, linked to the same models.
 
-- Reproducible experimental results with confidence intervals.
-- Clear ablation of each component (adaptation, uncertainty, missingness handling).
-- Honest reporting of limitations imposed by current data.
-- Working software that can accept new hospital cohorts via a documented interface.
-- Documentation and model cards sufficient for independent verification and future clinical evaluation studies.
+**C.** Provenance-aware separation of synthetic shift from genuine external validation, including documentation of the Mendeley Pima re-packaging.
 
----
-*This assessment will be updated if verified multi-site Nigerian data become available.*
+**D (secondary).** Offline-capable research software stack designed for future authorised multi-site evaluation.
+
+## 5. One-sentence claim
+
+We provide a reproducible, model- and scenario-stratified evaluation showing that unsupervised CORAL adaptation improves discrimination and calibration only under selected severe controlled covariate shifts on a public diabetes benchmark, while remaining neutral or harmful under milder or missingness-only conditions, accompanied by explanation-stability analysis and an offline-capable decision-support system designed for future authorised multi-site evaluation.
+
+See `docs/novelty_statement.md` for full positioning, exclusions, and paper-framing recommendations.
