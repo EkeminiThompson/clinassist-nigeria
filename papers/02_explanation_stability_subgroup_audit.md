@@ -1,15 +1,15 @@
-# Local Explanation Stability and Sparse Subgroup Auditing in a Small-Sample Diabetes Prediction Benchmark
+# Supplementary Technical Report: TreeSHAP Sensitivity and Sparse Subgroup Auditing in the Pima Diabetes Benchmark
 
 **Author:** Ekemini Thompson  
 **Affiliation:** Nnamdi Azikiwe University, Awka, Nigeria  
-**Status:** Working companion research note; not submitted or peer reviewed  
+**Status:** Supplementary technical report accompanying the primary ClinAssist benchmark manuscript; not a separate original research submission  
 **Study type:** Exploratory computational audit
 
 ## Abstract
 
 **Background:** Predictive performance alone does not establish that model explanations are stable or that subgroup estimates are sufficiently supported by data. Small benchmark datasets make these questions sensitive to perturbation size, subgroup event counts and resampling validity.
 
-**Objective:** To document two completed audits in a reproducible diabetes-prediction benchmark: local TreeSHAP feature-ranking stability under controlled input perturbations, and paired bootstrap subgroup comparisons with prespecified sparse-stratum suppression.
+**Objective:** To provide reproducible methodological detail for two ancillary analyses reported in the primary ClinAssist benchmark manuscript: local TreeSHAP feature-ranking sensitivity under controlled input perturbations, and paired-bootstrap subgroup auditing with prespecified sparse-stratum suppression.
 
 **Methods:** Analyses used OpenML dataset 37, the Pima Indians Diabetes benchmark. The explanation experiment trained random forest and XGBoost models on one stratified 75:25 split (seed 42), computed TreeSHAP attributions for up to 100 held-out observations, perturbed standardised features with Gaussian noise at standard deviations 0.01, 0.05 and 0.10, and compared feature rankings using rank-biased overlap (RBO; persistence 0.9). The subgroup audit considered age bands (<30, 30–49, 50+) and BMI bands (<18.5, 18.5–24.9, 25–29.9, ≥30). Source-only and CORAL predictions were paired by original row identifier. One thousand paired patient-row bootstrap draws were requested; comparisons were retained only when subgroup size, class-count and bootstrap-validity criteria were met.
 
@@ -23,7 +23,7 @@
 
 Clinical prediction studies often report discrimination and calibration without examining how sensitive model explanations are to small input changes or whether subgroup estimates are supported by adequate numbers of outcome events. These questions are important in small datasets, where a few observations can materially change subgroup metrics and feature-attribution rankings may respond to perturbations.
 
-This companion analysis documents two audits implemented alongside a broader controlled distribution-shift benchmark. The first examines local TreeSHAP feature-ranking agreement under specified Gaussian perturbations. The second describes a paired subgroup bootstrap workflow that suppresses comparisons failing prespecified sample and resampling criteria.
+This supplementary report expands the methods and audit-coverage details for two ancillary analyses already summarised in the primary ClinAssist benchmark manuscript. It is provided to improve transparency and reproducibility, not to claim a separate independent study. The first examines local TreeSHAP feature-ranking agreement under specified Gaussian perturbations. The second describes a paired subgroup bootstrap workflow that suppresses comparisons failing prespecified sample and resampling criteria.
 
 The data are the historical Pima Indians Diabetes benchmark, not a Nigerian clinical cohort. Stable feature rankings are not treated as causal explanations, and subgroup metrics are not treated as proof of fairness.
 
@@ -76,7 +76,7 @@ Both analyses are constrained by the benchmark's small sample size and populatio
 
 ## 5. Conclusion
 
-The completed exploratory audits show declining local TreeSHAP ranking agreement under larger Gaussian perturbations and document a paired subgroup bootstrap workflow that suppresses sparse comparisons. These findings support transparent reporting of explanation sensitivity and subgroup support in small-sample prediction studies. They do not establish causal explanations, fairness, clinical utility or Nigerian population validity.
+This supplementary report records the implementation details and coverage counts for the TreeSHAP sensitivity experiment and sparse subgroup audit. The single-split explanation analysis showed declining local feature-ranking agreement under larger Gaussian perturbations; the subgroup workflow suppressed comparisons that failed prespecified support or bootstrap-validity rules. These are ancillary methodological observations from the same Pima benchmark used in the primary manuscript. They do not establish causal explanations, fairness, clinical utility or Nigerian population validity, and they should not be submitted or presented as an independent second cohort study.
 
 ## Declarations
 
@@ -94,4 +94,4 @@ The completed exploratory audits show declining local TreeSHAP ranking agreement
 3. OpenML. Diabetes dataset, data ID 37. https://www.openml.org/d/37.
 4. Sun B, Feng J, Saenko K. Correlation Alignment for Unsupervised Domain Adaptation. arXiv:1612.01939. https://arxiv.org/abs/1612.01939.
 
-**Manuscript note:** This companion note shares the benchmark and computational infrastructure with the broader ClinAssist manuscript. The author should disclose the relationship to editors and avoid duplicate publication of overlapping tables or text.
+**Relationship to the primary manuscript:** This document is supplementary material for the ClinAssist calibration and domain-adaptation benchmark manuscript. Its TreeSHAP and subgroup-audit analyses are already summarised in that primary manuscript. Do not submit this report as a separate original research paper or duplicate the same results in another journal submission. If a journal requests supplementary methods or audit outputs, provide this document after checking its format and removing any overlap the editor considers unnecessary.
