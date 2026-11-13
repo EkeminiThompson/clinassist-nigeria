@@ -1,41 +1,42 @@
 # ClinAssist Nigeria
 
-Research prototype for explainable, uncertainty-aware and offline-capable clinical decision support under resource constraints.
+**Explainable, uncertainty-aware clinical prediction research under distribution shift.**
 
-## Data integrity
-The Mendeley deposit described as UITH + General Hospital Offa was found to repackage public Pima Indians Diabetes data without hospital identifiers. ESUTH research data remain inaccessible. The current model is a **public benchmark only**. Controlled synthetic shifts are not Nigerian external validation. See docs/dataset_provenance.md.
+Publication package for a reproducible computational benchmark study of discrimination, calibration, selective prediction and explanation stability under controlled covariate and missingness shift, with unsupervised CORAL domain adaptation.
 
-## Backend (Python 3.11 recommended)
+| Resource | Location |
+|---|---|
+| Primary manuscript | [`papers/01_calibration_domain_adaptation_diabetes.md`](papers/01_calibration_domain_adaptation_diabetes.md) |
+| Supplementary audit | [`papers/02_explanation_stability_subgroup_audit.md`](papers/02_explanation_stability_subgroup_audit.md) |
+| Independent verification | [`docs/independent_verification.md`](docs/independent_verification.md) |
+| Publication readiness | [`docs/publication_readiness.md`](docs/publication_readiness.md) |
+| Dataset provenance | [`docs/dataset_provenance.md`](docs/dataset_provenance.md) |
+
+## Key results (independently verified 2026-11-13)
+
+- Five-fold baseline: logistic regression AUROC 0.835, Brier 0.157, ECE 0.036.
+- Under severe controlled shift, CORAL substantially reduces Brier score and ECE for logistic regression, random forest and histogram gradient boosting; discrimination gains are model-dependent.
+- TreeSHAP rank-biased overlap remains high (0.95–0.99) under modest input noise.
+
+**Data scope:** public OpenML / Pima Indians Diabetes benchmark only. Not Nigerian hospital data. Not clinical validation.
+
+## Reproduce experiments
+
 ```bash
-python3.11 -m venv .venv
-source .venv/bin/activate
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r backend/requirements.txt
-export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(48))')"
-export DATABASE_URL="sqlite:///./clinassist.db"
 export PYTHONPATH="$PWD"
-alembic upgrade head
-uvicorn backend.app.main:app --reload
+python -m ml.datasets.download_pima   # if present
+python -m ml.experiments.run_baselines
+python -m ml.experiments.run_domain_adaptation
 ```
-Create the first admin after migrations: set ADMIN_EMAIL, ADMIN_NAME and ADMIN_PASSWORD (12+ characters), then run `python -m backend.scripts.create_admin`.
 
-## Frontend
-```bash
-cd frontend
-npm install
-cp .env.example .env
-npm run dev
-```
-The prediction workspace exposes logistic regression, Random Forest and XGBoost. The benchmark CSV is fetched and checksum-manifested with `PYTHONPATH=. python -m ml.datasets.download_pima`.
+Outputs: `ml/artifacts/experiments/`.
 
-## Research experiments
-```bash
-PYTHONPATH=. python -m ml.experiments.run_shift_study --repeats 5
-PYTHONPATH=. python -m ml.experiments.run_explanation_stability --seed 42 --n-explain 100
-PYTHONPATH=. python -m ml.experiments.run_subgroup_statistical_audit --bootstrap 1000 --seed 2026
-```
-These are controlled public-benchmark studies, not external validation. The shift study reports calibration, selective metrics and paired CORAL deltas; the explanation study measures local TreeSHAP rank stability; the audit reports descriptive age/BMI strata and paired within-split bootstrap intervals. Subgroups are exploratory and do not establish Nigerian fairness. Outputs go to `ml/artifacts/experiments/` and should be archived with the generated Pima manifest. GitHub Actions also runs all three scripts and uploads a `clinassist-research-results` artifact.
+## Software stack
 
-Development API docs: http://localhost:8000/api/docs (disabled in production).
+FastAPI backend, React frontend (PWA path), experiment pipeline under `ml/`. See backend and frontend READMEs for local development.
 
-## Validation and ethics
-No Nigerian hospital validation is claimed. Preprocessing is fitted on source training data only; target labels are not used for CORAL adaptation. SHAP is not causal. Clinical deployment requires ethics approval, local calibration, prospective workflow evaluation and independent external validation.
+## Citation
+
+Thompson, E. Evaluating Calibration, Model Robustness and Domain Adaptation in Diabetes Prediction Across Changing Data Distributions. Research manuscript, `EkeminiThompson/clinassist-nigeria` (2026).
