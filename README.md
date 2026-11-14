@@ -47,6 +47,10 @@ FastAPI backend, React frontend (PWA path), experiment pipeline under `ml/`. See
 Thompson, E. Evaluating Calibration, Model Robustness and Domain Adaptation in Diabetes Prediction Across Changing Data Distributions. Research manuscript, `EkeminiThompson/clinassist-nigeria` (2026).
 
 
+## Repeated-shift experiment outputs
+
+The seven-scenario, five-seed shift-study outputs are stored under `ml/artifacts/experiments/` after the reproducibility CI commit. See `docs/experiment_protocol.md` for the verified run record and `papers/01_calibration_domain_adaptation_diabetes.md` Appendix B for the paired scenario comparison.
+
 ## Submission and archiving metadata
 
 See [submission metadata and template instructions](docs/submission_metadata.md) for the computing-environment statement, Associate Editor confirmation note, ACM author-year BibLaTeX setup, and optional Zenodo deposit preparation.
