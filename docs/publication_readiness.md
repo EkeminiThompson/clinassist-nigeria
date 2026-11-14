@@ -6,6 +6,11 @@
 
 ## Completed
 
+- Added an evidence-based reproducibility checklist response at `docs/reproducibility_checklist_response.md`; clarified that no new dataset was introduced and distinguished source-dataset access status from a licence grant.
+- Added `DATA-LICENSE.md` to separate the MIT software licence, the existing benchmark's source terms and author-generated experiment outputs.
+- Added exact paired sign-flip tests for AUROC, Brier and ECE (63 comparisons) and archived the results. With five overlapping split pairs, the minimum two-sided p-value is 0.0625; no comparison is statistically significant at 0.05. The manuscript now reports this limitation explicitly.
+- Expanded the manuscript's rationale for the benchmark, classifier families, CORAL, scenario design, metrics, TreeSHAP and subgroup audit. Fixed hyperparameter settings are documented as protocol choices, not optimised values.
+
 1. Full methods, results tables, and discussion for the public-benchmark calibration and domain-adaptation study.
 2. Supplementary TreeSHAP stability and subgroup audit report with audit counts.
 3. Independent clean-environment experiment rerun (2026-11-13): baseline five-fold metrics match the archived manuscript table; CORAL reduces ECE under controlled age and BMI shifts.

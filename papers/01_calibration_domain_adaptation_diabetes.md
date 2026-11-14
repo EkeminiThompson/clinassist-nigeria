@@ -22,7 +22,7 @@ We used OpenML dataset 37, the Pima Indians Diabetes benchmark (768 records; 268
 In the severe combined covariate-and-missingness scenario, CORAL was associated with substantially lower mean Brier score and ECE for all three classifiers, while discrimination changes were model-dependent. For logistic regression, CORAL versus source-only yielded AUROC 0.8384 (SD 0.0239) versus 0.8391 (0.0255), Brier score 0.1547 (0.0128) versus 0.2450 (0.0157), and ECE 0.0643 (0.0175) versus 0.2900 (0.0138). For random forest, AUROC was 0.8431 (0.0235) versus 0.8069 (0.0313), Brier score 0.1540 (0.0103) versus 0.2210 (0.0099), and ECE 0.0765 (0.0072) versus 0.2172 (0.0107). For histogram gradient boosting, AUROC was 0.8223 (0.0192) versus 0.7718 (0.0170), Brier score 0.1638 (0.0081) versus 0.2269 (0.0081), and ECE 0.0754 (0.0139) versus 0.2094 (0.0121). These are means and standard deviations across five random splits, not independent external-validation estimates. In a separate single-split explanation experiment involving 100 test examples, mean rank-biased overlap declined as standardized feature noise increased: from 0.994 to 0.963 for random forest and from 0.971 to 0.952 for XGBoost across noise levels 0.01–0.10. The subgroup audit produced 1,638 descriptive metric rows and 819 paired-bootstrap comparisons; 609 comparisons met the prespecified minimum event and valid-resample criteria, while 210 sparse comparisons were suppressed.
 
 ### Conclusions
-In this controlled Pima benchmark, CORAL sometimes improved probability-error and calibration metrics under severe imposed shifts, with discrimination benefits varying by model. The results support evaluating calibration and uncertainty alongside discrimination when stress-testing tabular prediction models. They do not demonstrate Nigerian hospital performance, clinical utility, fairness, or readiness for patient care. Independent evaluation on appropriately governed Nigerian clinical cohorts is required before any clinical claims or deployment.
+In this controlled Pima benchmark, CORAL sometimes improved probability-error and calibration metrics under severe imposed shifts, with discrimination benefits varying by model. The descriptive results support evaluating calibration and uncertainty alongside discrimination when stress-testing tabular prediction models. The five-pair exact sign-flip analysis did not identify a comparison meeting p < 0.05; inferential claims are therefore limited. They do not demonstrate Nigerian hospital performance, clinical utility, fairness, or readiness for patient care. Independent evaluation on appropriately governed Nigerian clinical cohorts is required before any clinical claims or deployment.
 
 **Keywords:** diabetes prediction; domain adaptation; CORAL; calibration; distribution shift; missing data; selective prediction; explainable machine learning; Pima Indians Diabetes Dataset.
 
@@ -49,7 +49,9 @@ The contribution is an auditable, repeated-split evaluation pipeline that jointl
 
 ### 2.1 Study design and data source
 
-This was a retrospective computational benchmark study using OpenML dataset ID 37 (dataset name: diabetes; version 1), originally sourced from the UCI Pima Indians Diabetes Database. The dataset contains 768 records, eight predictors and a binary outcome. The class distribution was 500 outcome-negative and 268 outcome-positive records.
+The design is a controlled computational benchmark rather than a clinical validation study. The Pima benchmark was selected because it is a documented, publicly accessible, fixed-size binary clinical dataset that permits transparent reproduction of the complete pipeline; it was not selected as a proxy for Nigerian patients. The three classifiers provide complementary inductive biases: logistic regression is a regularised linear reference, random forest captures nonlinear interactions through bagged trees, and histogram gradient boosting provides a boosted-tree comparator with efficient tabular fitting. The comparison is methodological and is not intended to identify a clinically deployable winner.
+
+This was a retrospective computational benchmark study using OpenML dataset ID 37 (dataset name: diabetes; version 1), originally sourced from the UCI Pima Indians Diabetes Database (Smith et al., 1988; Vanschoren et al., 2013). The dataset contains 768 records, eight predictors and a binary outcome. The class distribution was 500 outcome-negative and 268 outcome-positive records.
 
 ### 2.2 Preprocessing
 
@@ -61,17 +63,21 @@ For each seed 42–46, `train_test_split` generated a stratified 75:25 partition
 
 ### 2.4 Classifiers and probability calibration
 
-The shift study used (i) logistic regression with `max_iter=1500`, `class_weight="balanced"`; (ii) random forest with 250 trees, maximum depth 6, minimum leaf size 3, balanced class weights and all available CPU workers; and (iii) scikit-learn histogram gradient boosting with 150 iterations, learning rate 0.06, at most 15 leaf nodes and L2 regularisation 1.0. Estimator random states were set to the corresponding split seed. Each estimator was wrapped in sigmoid probability calibration using three-fold cross-validation on source-training data (`CalibratedClassifierCV`, `cv=3`). The preprocessor was fitted only on source-training features in each split. These settings describe the shift-study models, not the separate baseline comparison in Table 1.
+The shift study used (i) logistic regression with `max_iter=1500`, `class_weight="balanced"`; (ii) random forest with 250 trees, maximum depth 6, minimum leaf size 3, balanced class weights and all available CPU workers; and (iii) scikit-learn histogram gradient boosting with 150 iterations, learning rate 0.06, at most 15 leaf nodes and L2 regularisation 1.0. Estimator random states were set to the corresponding split seed. Each estimator was wrapped in sigmoid probability calibration using three-fold cross-validation on source-training data (`CalibratedClassifierCV`, `cv=3`). Sigmoid calibration provides a low-complexity probability-mapping step for this small benchmark; three folds retain a usable calibration-training sample in each fold, and using source-training labels only prevents target-label leakage. The preprocessor was fitted only on source-training features in each split. These settings describe the shift-study models, not the separate baseline comparison in Table 1. The logistic-regression iteration ceiling was set high enough to permit convergence and balanced class weights address the benchmark's 500:268 class imbalance. The forest uses 250 trees to reduce ensemble variability, while depth 6 and minimum leaf size 3 constrain tree complexity on this small dataset. Histogram boosting uses 150 boosting iterations, a 0.06 learning rate, at most 15 leaves and L2 regularisation 1.0 as fixed moderate-complexity controls. These are protocol settings chosen for a reproducible comparison; no systematic hyperparameter search is claimed.
 
 The baseline experiment used scikit-learn's `GradientBoostingClassifier`, not `HistGradientBoostingClassifier`. Its five-fold out-of-fold comparison used logistic regression (`max_iter=1000`), random forest (200 trees, maximum depth 6), gradient boosting (150 estimators, maximum depth 3), XGBoost (150 estimators, depth 3, learning rate 0.1, row and column subsampling 0.8) and RBF SVM with probability estimates. The baseline split generator was shuffled stratified five-fold cross-validation with seed 42. These pooled out-of-fold baseline metrics must not be directly compared with the repeated-split, calibrated shift-study results. Exact settings are recorded in the executable experiment scripts.
 
 ### 2.5 Prespecified shift scenarios and parameters
+
+The scenario grid separates covariate perturbation from two missingness mechanisms, then combines them at mild and severe levels. The reference condition anchors each split; mild/severe covariate-only conditions isolate feature-distribution changes; MCAR and glucose-dependent MAR-like conditions isolate incomplete measurement; combined conditions test interaction between shift types. The numerical severities are controlled stress-test settings chosen to create ordered perturbation levels, not estimates of observed Nigerian or clinical shift magnitudes.
 
 The seven target-domain conditions comprise an unshifted reference condition, mild covariate shift, severe covariate shift, 10% missing-completely-at-random (MCAR), 10% glucose-dependent missing-at-random (MAR), combined mild shift, and combined severe shift. Covariate transformations are applied to raw held-out values before the zero-to-missing preprocessing step; consequently, some recorded zeros can become non-zero in shifted scenarios and will not subsequently be recoded as missing. This ordering is retained as a methodological limitation. Covariate-shift severity is 0.5 (mild) or 1.5 (severe). The combined mild condition applies severity 0.5 with 10% MCAR missingness; the combined severe condition applies severity 1.5 with 20% glucose-dependent MAR missingness. The single-mechanism missingness conditions use 10% missingness. The severe-combined result tables in this manuscript therefore refer to 20%, not 10%, missingness.
 
 The executable protocol applies these transformations to raw held-out features before zero-to-missing conversion, imputation and scaling. For severity `s` (0.5 or 1.5), glucose is transformed as `G' = G(1 + 0.15s) + 5s`, BMI as `B' = B(1 + 0.10s) + 1.5s`, and age as `A' = A(1 + 0.05s) + 2s`; other features are not directly shifted. For each split seed `r` (42–46), scenario index `j` (zero-based, in the order listed above) uses missingness RNG seed `r + 1000j`. MCAR independently masks every feature cell with probability 0.10. The MAR-like mechanism standardises shifted glucose within the held-out set to `z`, computes row probability `q_i = clip(2m/(1 + exp(-z_i)), 0, 1)`, where `m` is the configured missing rate, and independently masks skin thickness and insulin for each row using `q_i`. The combined severe condition therefore uses `m = 0.20`. The reference condition has no transformation or missingness. The exact implementation is in `ml/experiments/run_shift_study.py`; these are controlled perturbations, not observed population shifts.
 
 ### 2.6 Domain adaptation
+
+CORAL was selected as a transparent, label-free comparator because it aligns first- and second-order feature statistics and can be fitted from target covariates without target outcomes. It provides a controlled test of unsupervised feature alignment rather than a claim that this method is optimal for clinical transfer.
 
 The source-only arm fits the model using source-training data. In the CORAL arm, the target feature matrix is used without target labels to align source and target means and covariance structure. This is transductive unsupervised adaptation: target covariates are available during adaptation, but target outcomes are reserved for evaluation.
 
@@ -87,19 +93,27 @@ The implementation uses the row-vector mapping `(X_s - mean_s) @ C_s^(-1/2) @ C_
 
 ### 2.7 Performance metrics
 
-AUROC, AUPRC, Brier score, ten-bin ECE, calibration intercept and slope, selective metrics at 80% entropy-based coverage.
+AUROC and AUPRC quantify ranking discrimination, with AUPRC providing a precision–recall view under class imbalance. Brier score measures squared probability error, while ten-bin expected calibration error (ECE), calibration intercept and calibration slope assess agreement between predicted probabilities and observed outcomes. Risk–coverage behaviour and metrics at 80% entropy-based coverage assess the trade-off when predictions with greatest uncertainty are withheld. No single metric is sufficient: a model can preserve ranking while producing poorly calibrated probabilities. The metrics were therefore selected to distinguish discrimination, probability quality and selective-prediction behaviour.
 
 ### 2.8 Explanation stability
 
-TreeSHAP for random forest (250 trees, depth 6, minimum leaf size 3) and XGBoost (180 estimators, depth 3, learning rate 0.04, subsample and column subsample 0.8, L2 penalty 2) on up to 100 held-out examples from the seed-42 split. Standardised Gaussian noise was added at SD 0.01, 0.05 and 0.10 using a NumPy generator initialised with seed 42; feature rankings were compared with rank-biased overlap (persistence 0.9).
+TreeSHAP was used because both evaluated estimators are tree-based and TreeSHAP provides a consistent feature-attribution framework for these models. Rank-biased overlap (RBO) with persistence 0.9 gives greater weight to agreement near the top of ranked feature lists; the three noise levels probe progressively larger perturbations on standardised inputs. This analysis measures ranking stability, not explanation fidelity or clinical validity.
+
+TreeSHAP for random forest (250 trees, depth 6, minimum leaf size 3) and XGBoost (180 estimators, depth 3, learning rate 0.04, subsample and column subsample 0.8, L2 penalty 2) on up to 100 held-out examples from the seed-42 split. The explanation-study estimators use moderate tree depth and explicit subsampling/L2 controls to limit complexity; these settings are fixed sensitivity-analysis configurations, not tuned optima. Standardised Gaussian noise was added at SD 0.01, 0.05 and 0.10 using a NumPy generator initialised with seed 42; feature rankings were compared with rank-biased overlap (persistence 0.9).
 
 ### 2.9 Exploratory subgroup audit
+
+Age and BMI strata were selected as clinically interpretable descriptive slices available in the benchmark. The minimum cell-size and event-count rules reduce unstable summaries in sparse strata; paired bootstrap resampling uses identical patient indices for source-only and CORAL to preserve within-patient pairing. This audit is exploratory and does not establish fairness or subgroup safety.
 
 Age and BMI strata with eligibility ≥20 observations and ≥5 events per class. Paired bootstrap (1,000 draws) for source-only versus CORAL. Sparse strata suppressed.
 
 ### 2.10 Software environment
 
 The author's reported local development workstation is a 13-inch MacBook Pro (Mid-2012; model identifier `MacBookPro9,2`) with an Intel Core i5 processor at 2.5 GHz, one physical processor package, two CPU cores and 8 GB RAM. The operating-system information returned by `sw_vers` was ProductName `Mac OS X`, ProductVersion `10.15.8`, BuildVersion `19H2026`. These specifications describe the author's workstation as reported; they are not evidence that every experiment or the final table-producing run was executed on this machine. The independent verification report records Python 3.12, scikit-learn 1.9.1 and XGBoost 3.4.1 for the clean verification run dated 2026-11-13. The separate research CI environment is described in Appendix A. Exact historical run-to-machine mapping and the remaining dependency versions for the original table-producing run were not retained.
+
+### 2.11 Statistical analysis
+
+The primary paired contrast was CORAL minus source-only within each identical split, model and shift scenario. For AUROC, Brier score and ECE, two-sided exact sign-flip permutation tests were applied to the five split-level paired differences for each of the 21 model-by-scenario contrasts (63 tests). The test enumerates all 32 sign assignments and uses the absolute mean paired difference as the test statistic. Holm adjustment was applied separately within each metric family of 21 comparisons. The analysis unit is the repeated split, not the patient. Because the five train/test partitions overlap, the split-level contrasts are dependent; the tests are therefore exploratory sensitivity analyses and do not support population-level or clinical inference. With only five pairs, the smallest attainable two-sided exact p-value is 0.0625. No contrast can reach the conventional 0.05 threshold, even before multiplicity adjustment. The complete results are in `ml/artifacts/experiments/paired_sign_flip_tests.csv`; the executable analysis is `ml/analysis/paired_sign_flip_tests.py`.
 
 ## 3. Results
 
@@ -141,6 +155,10 @@ The author's reported local development workstation is a 13-inch MacBook Pro (Mi
 
 A clean-environment rerun reproduced Table 1 exactly and confirmed CORAL ECE reduction under controlled age and BMI shifts (see `docs/independent_verification.md`).
 
+### 3.5 Exploratory paired sign-flip tests
+
+Exact two-sided sign-flip tests were conducted on the five paired split-level CORAL-minus-source-only differences for AUROC, Brier score and ECE across all 21 model-by-scenario comparisons. The smallest unadjusted p-value was 0.0625, the minimum attainable with five pairs and 32 sign assignments. Holm-adjusted p-values were 1.000 across the reported metric families. No comparison met a two-sided 0.05 threshold. The large and directionally consistent Brier/ECE differences in some imposed-shift conditions should therefore be interpreted as descriptive effects in this small, repeated-split benchmark, not as statistically established improvements. The split overlap and low number of pairs further limit inferential strength. Full test statistics are archived in `ml/artifacts/experiments/paired_sign_flip_tests.csv`.
+
 ## 4. Discussion
 
 CORAL’s benefit is model- and scenario-dependent. Under severe controlled covariate shift, tree ensembles gained discrimination and all models gained calibration; under reference and missingness-only conditions effects were negligible or adverse. Joint reporting of discrimination and calibration is essential.
@@ -149,7 +167,7 @@ The analysis uses a public historical benchmark and controlled synthetic shifts.
 
 ## 5. Data and code availability
 
-Analysis code, experiment manifests, provenance documentation and independent verification report: `EkeminiThompson/clinassist-nigeria`. Benchmark data retrieved from OpenML with recorded checksum.
+Analysis code, experiment manifests, raw run-level metrics, held-out prediction outputs, paired differences, exact sign-flip test results, provenance documentation and independent verification report are available in `EkeminiThompson/clinassist-nigeria`. The original benchmark is an existing public dataset retrieved as OpenML dataset 37 (version 1); it is not a newly introduced dataset and the source CSV is not redistributed in the repository. OpenML records the dataset access status as “Public”; this metadata is not an SPDX or Creative Commons licence grant. The original dataset attribution and use conditions must therefore be followed, and no new licence is asserted for the source dataset. The author-generated experiment summaries and analysis outputs are released under CC BY 4.0 to the extent of rights held by the author; source-dataset rights and conditions remain unaffected. See `DATA-LICENSE.md` and `docs/dataset_provenance.md`.
 
 
 
@@ -192,3 +210,11 @@ The complete repeated-split outputs are committed under `ml/artifacts/experiment
 | combined_severe | Random forest | +0.0362 (0.0281) | −0.0670 (0.0089) | −0.1407 (0.0134) |
 
 The table contains all 21 model-by-scenario comparisons. The committed files retain all 210 split/model/scenario/adaptation metric rows, 1,050 paired metric differences and 40,320 held-out prediction rows. The rounded summary CSV contains 42 model-by-scenario-by-adaptation rows. The full JSON manifest preserves the run-level metric values.
+
+## References
+
+Smith, J. W., Everhart, J. E., Dickson, W. C., Knowler, W. C., & Johannes, R. S. (1988). Using the ADAP learning algorithm to forecast the onset of diabetes mellitus. *Proceedings of the Symposium on Computer Applications and Medical Care*, 261–265.
+
+Sun, B., Feng, J., & Saenko, K. (2016). Return of frustratingly easy domain adaptation. Proceedings of the AAAI Conference on Artificial Intelligence, 30(1). https://doi.org/10.1609/aaai.v30i1.10306.\n\nVanschoren, J., van Rijn, J. N., Bischl, B., & Torgo, L. (2013). OpenML: Networked science in machine learning. *SIGKDD Explorations*, 15(2), 49–60. https://doi.org/10.1145/2641190.2641198
+
+Feurer, M., van Rijn, J. N., Kadra, A., Gijsbers, P., Mallik, N., Ravi, S., Müller, A., Vanschoren, J., & Hutter, F. (2021). OpenML-Python: An extensible Python API for OpenML. *Journal of Machine Learning Research*, 22(100), 1–5.

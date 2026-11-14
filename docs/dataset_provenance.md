@@ -28,6 +28,10 @@
 
 The repository provides `ml.datasets.download_pima`, which fetches OpenML dataset ID 37, validates the eight expected feature aliases, 768 rows and 500/268 class counts, and writes a local SHA-256 provenance manifest. The CSV is not committed. The benchmark's source population is adult women of Pima heritage; it is not a Nigerian cohort.
 
+## 3.1 Attribution and access/licence qualification
+
+The experiment retrieves OpenML dataset 37, version 1. Its OpenML record labels the dataset Public and cites the UCI Pima Indians Diabetes Database and Vincent Sigillito as donor. Public is an access-status label; it is not, by itself, a CC0, CC BY or SPDX licence. The source CSV is not redistributed in this repository. Cite Smith et al. (1988) and OpenML (Vanschoren et al., 2013; Feurer et al., 2021), and observe the source repository's applicable attribution and use terms. Do not apply the repository's MIT software licence to the source dataset.
+
 ## 4. Research Implications
 
 True hospital-level domain adaptation experiments between Nigerian teaching hospitals cannot currently be performed with the available data.  
@@ -57,3 +61,10 @@ All experimental results will be explicitly labelled with the data source used. 
 
 ---
 *This document is part of the reproducible research record of ClinAssist Nigeria.*
+
+
+## References
+
+Smith, J. W., Everhart, W. C., Dickson, W. C., Knowler, W. C., & Johannes, R. S. (1988). Using the ADAP learning algorithm to forecast the onset of diabetes mellitus. Proceedings of the Symposium on Computer Applications and Medical Care, 261–265.
+
+Vanschoren, J., van Rijn, J. N., Bischl, B., & Torgo, L. (2013). OpenML: Networked science in machine learning. SIGKDD Explorations, 15(2), 49–60. https://doi.org/10.1145/2641190.2641198.

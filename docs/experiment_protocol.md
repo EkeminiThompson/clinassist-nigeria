@@ -75,7 +75,7 @@ Age'=Age(1+0.05s)+2s
 
 MCAR independently masks each cell with probability (m). The MAR-like mechanism standardises shifted glucose within the held-out matrix, computes (q_i=\operatorname{clip}(2m/(1+e^{-z_i}),0,1)), and independently masks SkinThickness and Insulin for each row with probability (q_i). It is a controlled glucose-dependent missingness mechanism, not a claim about a clinically observed missingness process.
 
-The script writes:
+The baseline script writes `baseline_cv_predictions.csv`, one out-of-fold probability per benchmark row and model, including original row index, fold, and observed label. `baseline_cv_results.json` retains the aggregate five-fold metrics. The shift-study script writes:
 - `synthetic_shift_runs.csv`: unrounded split/model/scenario/arm metrics.
 - `synthetic_shift_predictions.csv`: held-out patient-row labels and probabilities for paired audit.
 - `synthetic_shift_summary.csv`: mean and standard deviation by model, scenario and arm, rounded to five decimals.
@@ -127,3 +127,18 @@ The CI workflow configures these commands and artifact upload. A workflow defini
 
 
 **Bitwise reproducibility note:** a subsequent fixed-seed rerun showed sub-micro floating-point variation in some unrounded calibration and paired-difference fields. The rounded scenario summaries and Appendix B paired comparisons remained unchanged to four decimal places. The committed output snapshot is the successful run #164; later CI runs retain artifacts but do not automatically rewrite this reviewed snapshot.
+
+## Statistical comparison added for the frozen five-split output
+
+The analysis script ml/analysis/paired_sign_flip_tests.py reads the committed split-level paired differences and enumerates all 2^5=32 sign assignments for each two-sided exact sign-flip test. It analyses AUROC, Brier and ECE for each of the 21 model-by-scenario comparisons (63 tests total), then applies Holm adjustment within each metric family. The generated table is ml/artifacts/experiments/paired_sign_flip_tests.csv.
+
+With five pairs, the minimum attainable two-sided p-value is 0.0625. No result reaches 0.05; Holm-adjusted values are 1.00. The five train/test splits overlap, so this is an exploratory sensitivity analysis at split level, not confirmatory population inference. Do not describe any result as statistically significant. A larger, independently designed evaluation would be needed for confirmatory inference.
+
+## Licensing boundary
+
+The original benchmark is OpenML dataset 37, version 1. The OpenML record labels it Public but does not supply a specific CC or SPDX licence identifier. The source CSV is not redistributed here; users must retain original dataset attribution and follow the source terms. The author's generated analysis outputs are CC BY 4.0 to the extent of author-held rights, while source labels retain their original rights and terms. Software remains MIT-licensed. See DATA-LICENSE.md.
+
+
+## Unaggregated explanation and subgroup outputs
+
+The TreeSHAP stability script writes `explanation_stability_raw.csv`, one RBO value per explained held-out example, model and perturbation level, in addition to the model/noise summary table. The subgroup audit writes `subgroup_bootstrap_draws.csv.gz`, retaining each valid paired bootstrap replicate's AUROC, AUPRC and Brier deltas together with subgroup, split, model and scenario identifiers. `subgroup_metrics.csv` retains group-level metric rows and `subgroup_paired_bootstrap.csv` retains interval summaries and validity counts. The raw draw file records valid draws; the bootstrap seed (2026 by default), requested replicate count and minimum-valid rule are recorded in the executable protocol. The raw output files are committed by research CI.

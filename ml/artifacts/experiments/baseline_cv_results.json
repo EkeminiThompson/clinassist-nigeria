@@ -1,5 +1,5 @@
 {
-  "data_source": "Public Pima Indians Diabetes (UCI) – methodological benchmark only",
+  "data_source": "Public Pima Indians Diabetes (UCI) \u2013 methodological benchmark only",
   "note": "Not Nigerian multi-hospital data. See docs/dataset_provenance.md",
   "n_samples": 768,
   "n_splits": 5,
@@ -14,7 +14,10 @@
       "sensitivity": 0.5708955223880597,
       "specificity": 0.88,
       "brier": 0.15708721726138386,
-      "ece": 0.03601902540289883
+      "ece": 0.03601902540289883,
+      "calibration_intercept_in_large": -0.02544969408180811,
+      "calibration_intercept": -0.053859081912023384,
+      "calibration_slope": 0.9417172867306415
     },
     "random_forest": {
       "auroc": 0.8341865671641792,
@@ -25,7 +28,10 @@
       "sensitivity": 0.5634328358208955,
       "specificity": 0.864,
       "brier": 0.15742907381265517,
-      "ece": 0.03978972568994198
+      "ece": 0.03978972568994196,
+      "calibration_intercept_in_large": -0.0026380320022343752,
+      "calibration_intercept": 0.06862924951187004,
+      "calibration_slope": 1.1799992088897562
     },
     "gradient_boosting": {
       "auroc": 0.8265373134328358,
@@ -36,18 +42,24 @@
       "sensitivity": 0.6268656716417911,
       "specificity": 0.826,
       "brier": 0.16756215201462377,
-      "ece": 0.08389891652849782
+      "ece": 0.08389891652849782,
+      "calibration_intercept_in_large": 0.015814272394054755,
+      "calibration_intercept": -0.13703246813709763,
+      "calibration_slope": 0.6305436338636236
     },
     "xgboost": {
-      "auroc": 0.8246641791044778,
-      "auprc": 0.691974598313646,
-      "precision": 0.6680161943319838,
-      "recall": 0.6156716417910447,
-      "f1": 0.6407766990291263,
-      "sensitivity": 0.6156716417910447,
-      "specificity": 0.836,
-      "brier": 0.16433711349964142,
-      "ece": 0.06424869906428891
+      "auroc": 0.822044776119403,
+      "auprc": 0.6910425164886456,
+      "precision": 0.6639676113360324,
+      "recall": 0.6119402985074627,
+      "f1": 0.6368932038834951,
+      "sensitivity": 0.6119402985074627,
+      "specificity": 0.834,
+      "brier": 0.1660844732267582,
+      "ece": 0.06815423156460079,
+      "calibration_intercept_in_large": 0.024796352251368416,
+      "calibration_intercept": -0.11096816609815023,
+      "calibration_slope": 0.645609665138002
     },
     "svm_rbf": {
       "auroc": 0.8210671641791044,
@@ -58,7 +70,10 @@
       "sensitivity": 0.5410447761194029,
       "specificity": 0.868,
       "brier": 0.16424587205273436,
-      "ece": 0.05479509248170221
+      "ece": 0.05479509248170221,
+      "calibration_intercept_in_large": -0.036948209180713336,
+      "calibration_intercept": -0.043595892611988554,
+      "calibration_slope": 0.9877239012983449
     }
   }
 }
