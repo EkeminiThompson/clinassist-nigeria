@@ -13,6 +13,9 @@ Publication package for a reproducible computational benchmark study of discrimi
 | Independent verification | [`docs/independent_verification.md`](docs/independent_verification.md) |
 | Publication readiness | [`docs/publication_readiness.md`](docs/publication_readiness.md) |
 | Dataset provenance | [`docs/dataset_provenance.md`](docs/dataset_provenance.md) |
+| Reproducibility checklist response | [`docs/reproducibility_checklist_response.md`](docs/reproducibility_checklist_response.md) |
+| Data licensing boundary | [`DATA-LICENSE.md`](DATA-LICENSE.md) |
+| Exact paired sign-flip analysis | [`ml/analysis/paired_sign_flip_tests.py`](ml/analysis/paired_sign_flip_tests.py) |
 | Exact experiment protocol | [`docs/experiment_protocol.md`](docs/experiment_protocol.md) |
 
 ## Key results (independently verified 2026-11-13)
