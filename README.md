@@ -45,3 +45,8 @@ FastAPI backend, React frontend (PWA path), experiment pipeline under `ml/`. See
 ## Citation
 
 Thompson, E. Evaluating Calibration, Model Robustness and Domain Adaptation in Diabetes Prediction Across Changing Data Distributions. Research manuscript, `EkeminiThompson/clinassist-nigeria` (2026).
+
+
+## Submission and archiving metadata
+
+See [submission metadata and template instructions](docs/submission_metadata.md) for the computing-environment statement, Associate Editor confirmation note, ACM author-year BibLaTeX setup, and optional Zenodo deposit preparation.
