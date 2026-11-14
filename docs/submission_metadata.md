@@ -41,8 +41,12 @@ For an ACM venue that explicitly requires author-year references, use the ACM-su
 
 Do not combine this BibLaTeX setup with the BibTeX commands `\bibliographystyle{ACM-Reference-Format}` or `\bibliography{references}`. Confirm that the target ACM journal or conference actually requires author-year style; most ACM venues default to numeric citations. The final template and journal instructions take precedence.
 
-## Zenodo deposit (optional; not yet deposited)
+## Zenodo software archive
 
-The repository now includes `CITATION.cff` and `.zenodo.json` as deposit metadata preparation. No Zenodo record or DOI exists yet. To create one, enable the public GitHub repository in Zenodo, create a versioned GitHub release after the final code and experiment artifacts have been checked, and wait for Zenodo to archive the release and issue its DOI. Add the DOI to the manuscript, README and citation metadata only after Zenodo returns it.
+**Version:** `v0.1.0`  
+**DOI supplied by author:** [10.5281/zenodo.24215668](https://doi.org/10.5281/zenodo.24215668)  
+**GitHub release:** https://github.com/EkeminiThompson/clinassist-nigeria/releases/tag/v0.1.0
+
+The GitHub `v0.1.0` release is published and the author has supplied the Zenodo DOI above. The DOI has been added to `CITATION.cff` and the README. Before manuscript submission, confirm that the Zenodo landing page displays the expected title, author, version and archived files. The GitHub release and DOI identify the software archive; they do not establish clinical validation or external validation.
 
 The repository's MIT licence covers code only. Dataset and third-party asset rights remain governed by their own terms. Do not upload restricted clinical data or unlicensed third-party datasets to Zenodo.
