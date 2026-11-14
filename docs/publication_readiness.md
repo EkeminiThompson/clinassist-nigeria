@@ -21,12 +21,15 @@
 ## Remaining author / journal steps
 
 - Retrieve the exact successful CI or archived run artifact for the manuscript results; reconcile all seven scenario summaries and paired AUROC differences from unrounded split-level output.
-- Confirm original-run hardware, operating system, complete package versions and whether any hyperparameter search was performed.
+- Original-run hardware, operating system and complete package lock remain unavailable; the current CI runner is pinned and logs hardware details but does not reconstruct historical runs.
+- Confirm whether any separate hyperparameter search was performed.
+- Confirm the Associate Editor assignment before using the author-supplied name Dr. Joshua Babatunde Agbogun in correspondence.
+- If the optional Zenodo archive is desired, review the prepared `CITATION.cff` and `.zenodo.json`, then create a versioned release and obtain a DOI. No DOI has been issued.
 - Review the exact shift equations, random seeds and CORAL mapping in `docs/experiment_protocol.md` against the final manuscript.
 
 ## Author / journal steps (outside the repository)
 
-- Final reference list and citation style for the target venue.
+- Final reference list and citation style for the target venue. ACM author-year BibLaTeX setup is documented in `docs/submission_metadata.md`; use it only if the selected ACM venue requires author-year references.
 - Author contribution and competing-interest statements.
 - Institutional review / ethics determination as required by the venue (computational benchmark using public data).
 - TRIPOD+AI checklist completion for prediction-model reporting.
