@@ -24,7 +24,7 @@
 - Original-run hardware, operating system and complete package lock remain unavailable; the current CI runner is pinned and logs hardware details but does not reconstruct historical runs.
 - Confirm whether any separate hyperparameter search was performed.
 - Confirm the Associate Editor assignment before using the author-supplied name Dr. Joshua Babatunde Agbogun in correspondence.
-- If the optional Zenodo archive is desired, review the prepared `CITATION.cff` and `.zenodo.json`, then create a versioned release and obtain a DOI. No DOI has been issued.
+- Zenodo software archive DOI supplied: [10.5281/zenodo.24215668](https://doi.org/10.5281/zenodo.24215668); GitHub release `v0.1.0` is published. Confirm the Zenodo landing-page metadata and archived files before manuscript submission.
 - Review the exact shift equations, random seeds and CORAL mapping in `docs/experiment_protocol.md` against the final manuscript.
 
 ## Author / journal steps (outside the repository)
