@@ -1,7 +1,7 @@
 # Evaluating Calibration, Model Robustness and Domain Adaptation in Diabetes Prediction Across Changing Data Distributions
 
-**Author:** Ekemini Thompson¹  
-**Affiliations:** ¹Nnamdi Azikiwe University, Awka, Anambra State, Nigeria  
+**Author:** Ekemini Thompson¹˒²  
+**Affiliations:** ¹Nnamdi Azikiwe University, Awka, Anambra State, Nigeria; ²VergelAI  
 **Corresponding author:** Ekemini Thompson, ekemini.thompson@outlook.com  
 **ORCID:** [0009-0006-0072-3905](https://orcid.org/0009-0006-0072-3905)  
 **Manuscript status:** Research manuscript (v1.1) — results independently verified (2026-11-13)  
