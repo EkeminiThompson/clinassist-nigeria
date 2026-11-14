@@ -112,7 +112,11 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add ml/datasets/pima_manifest.json
+          if git ls-files --error-unmatch ml/datasets/pima_manifest.json >/dev/null 2>&1; then
+            git checkout -- ml/datasets/pima_manifest.json
+          else
+            git add ml/datasets/pima_manifest.json
+          fi
           git add -f \
             ml/artifacts/experiments/synthetic_shift_study.json \
             ml/artifacts/experiments/synthetic_shift_runs.csv \
