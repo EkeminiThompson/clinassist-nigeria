@@ -1,0 +1,26 @@
+{
+  "source": "OpenML dataset id 37 (Pima Indians Diabetes; original source NIDDK/UCI)",
+  "openml_data_id": 37,
+  "dataset_name": "diabetes",
+  "version": "1",
+  "retrieved_at": "2026-11-14T07:31:20.053128+00:00",
+  "n_samples": 768,
+  "class_counts": {
+    "0": 500,
+    "1": 268
+  },
+  "feature_columns": [
+    "Pregnancies",
+    "Glucose",
+    "BloodPressure",
+    "SkinThickness",
+    "Insulin",
+    "BMI",
+    "DiabetesPedigreeFunction",
+    "Age"
+  ],
+  "target_column": "Outcome",
+  "csv_sha256": "c980e5e01dc1c554a358102b773f34b29599d0051ec5cf5b56ad1c6fcb3a23b0",
+  "file": "diabetes_dataset.csv",
+  "note": "Historical Pima cohort of adult women; methodological benchmark only, not Nigerian hospital validation."
+}
