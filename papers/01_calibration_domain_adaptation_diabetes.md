@@ -150,3 +150,10 @@ The analysis uses a public historical benchmark and controlled synthetic shifts.
 ## 5. Data and code availability
 
 Analysis code, experiment manifests, provenance documentation and independent verification report: `EkeminiThompson/clinassist-nigeria`. Benchmark data retrieved from OpenML with recorded checksum.
+
+
+## Appendix A. Computing environment
+
+The repository's reproducibility workflow runs the research-benchmark job on a GitHub-hosted `ubuntu-24.04` x86-64 runner. For public repositories, GitHub documents the standard runner configuration as 4 vCPUs and 16 GB RAM. The workflow records the actual CPU model, logical CPU count, memory and operating-system release in the run log for each execution. The Python environment for this workflow is Python 3.11, as configured in `.github/workflows/ci.yml`.
+
+**Important distinction:** these are the specifications of the current CI reproduction environment, not verified specifications of the historical experiment run or the independent clean-environment verification dated 2026-11-13. The original run's CPU model, RAM and operating system were not retained and cannot be reconstructed from the reported metrics. Do not attribute the CI hardware to those earlier runs.
