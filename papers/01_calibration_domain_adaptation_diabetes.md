@@ -57,17 +57,19 @@ Five predictors—glucose, blood pressure, skin thickness, insulin and BMI—wer
 
 ### 2.3 Repeated source/target splits
 
-Five random seeds (42–46). Stratified 75:25 train/test partitions (576 training, 192 held-out). Repeated random splits describe split-to-split variability; they are not independent external validations.
+For each seed 42–46, `train_test_split` generated a stratified 75:25 partition (576 source-training and 192 held-out target rows). The split seed was the integer seed itself. Repeated random splits describe split-to-split variability; they are not independent external validations.
 
 ### 2.4 Classifiers and probability calibration
 
-Logistic regression (class_weight=balanced), random forest (250 trees; maximum depth 6), and scikit-learn histogram gradient boosting (150 boosting iterations) were used in the shift study. Each shift-study classifier used sigmoid probability calibration with three-fold cross-validation on source-training data. These settings describe the shift-study models, not the separate uncalibrated baseline comparison in Table 1. The baseline experiment used scikit-learn's `GradientBoostingClassifier` for its gradient-boosting row, not `HistGradientBoostingClassifier`; its pooled out-of-fold metrics are reported separately and must not be directly compared with the repeated-split, calibrated shift-study results. Full estimator constructor arguments and XGBoost-specific TreeSHAP model settings must be verified against the executed experiment scripts before submission.
+The shift study used (i) logistic regression with `max_iter=1500`, `class_weight="balanced"`; (ii) random forest with 250 trees, maximum depth 6, minimum leaf size 3, balanced class weights and all available CPU workers; and (iii) scikit-learn histogram gradient boosting with 150 iterations, learning rate 0.06, at most 15 leaf nodes and L2 regularisation 1.0. Estimator random states were set to the corresponding split seed. Each estimator was wrapped in sigmoid probability calibration using three-fold cross-validation on source-training data (`CalibratedClassifierCV`, `cv=3`). The preprocessor was fitted only on source-training features in each split. These settings describe the shift-study models, not the separate baseline comparison in Table 1.
+
+The baseline experiment used scikit-learn's `GradientBoostingClassifier`, not `HistGradientBoostingClassifier`. Its five-fold out-of-fold comparison used logistic regression (`max_iter=1000`), random forest (200 trees, maximum depth 6), gradient boosting (150 estimators, maximum depth 3), XGBoost (150 estimators, depth 3, learning rate 0.1, row and column subsampling 0.8) and RBF SVM with probability estimates. The baseline split generator was shuffled stratified five-fold cross-validation with seed 42. These pooled out-of-fold baseline metrics must not be directly compared with the repeated-split, calibrated shift-study results. Exact settings are recorded in the executable experiment scripts.
 
 ### 2.5 Prespecified shift scenarios and parameters
 
 The seven target-domain conditions comprise an unshifted reference condition, mild covariate shift, severe covariate shift, 10% missing-completely-at-random (MCAR), 10% glucose-dependent missing-at-random (MAR), combined mild shift, and combined severe shift. Covariate transformations are applied to raw held-out values before the zero-to-missing preprocessing step; consequently, some recorded zeros can become non-zero in shifted scenarios and will not subsequently be recoded as missing. This ordering is retained as a methodological limitation. Covariate-shift severity is 0.5 (mild) or 1.5 (severe). The combined mild condition applies severity 0.5 with 10% MCAR missingness; the combined severe condition applies severity 1.5 with 20% glucose-dependent MAR missingness. The single-mechanism missingness conditions use 10% missingness. The severe-combined result tables in this manuscript therefore refer to 20%, not 10%, missingness.
 
-The manuscript records the scenario-level rates and severity values available in the experiment documentation. The exact feature-wise transformation equations and per-scenario random seeds must be checked against the versioned experiment script before submission; they are not reconstructed from outcome tables.
+The executable protocol applies the following transformations to the raw held-out matrix, before zero-to-missing conversion, imputation and scaling. For severity (s\in\{0.5,1.5\}), glucose is transformed as (G'=G(1+0.15s)+5s), BMI as (B'=B(1+0.10s)+1.5s), and age as (A'=A(1+0.05s)+2s); other features are not directly shifted. For each split seed (r\in\{42,\ldots,46\}), scenario index (j\) (in the order listed above) uses missingness RNG seed (r+1000j). MCAR independently masks every feature cell with probability 0.10. The MAR-like mechanism standardises shifted glucose within the held-out set, computes row probability (q_i=\operatorname{clip}(2m/(1+e^{-z_i}),0,1)), where (m\) is the configured missing rate, and independently masks skin thickness and insulin for each row using (q_i). The combined severe condition therefore uses (m=0.20). The reference condition has no transformation or missingness. The exact implementation is in `ml/experiments/run_shift_study.py`; these are controlled perturbations, not observed population shifts.
 
 ### 2.6 Domain adaptation
 
@@ -79,7 +81,7 @@ $
 X_{s\rightarrow t}=(X_s-\mu_s)C_s^{-1/2}C_t^{1/2}+\mu_t.
 $
 
-This expression describes both mean and covariance alignment. It must be checked against the exact implementation before submission; target labels are not used to estimate either alignment statistic.
+The implementation uses the row-vector mapping `(X_s - mean_s) @ C_s^(-1/2) @ C_t^(1/2) + mean_t`, where the inverse square root is applied first and the target covariance square root second. The covariance matrices are regularised with epsilon (10^{-5}). The adapter's `fit(source_X, target_X)` interface accepts feature matrices only; target labels are not used to estimate either alignment statistic.
 
 
 
@@ -89,7 +91,7 @@ AUROC, AUPRC, Brier score, ten-bin ECE, calibration intercept and slope, selecti
 
 ### 2.8 Explanation stability
 
-TreeSHAP for random forest and XGBoost on 100 held-out examples; Gaussian noise at SD 0.01, 0.05, 0.10; rank-biased overlap (persistence 0.9).
+TreeSHAP for random forest (250 trees, depth 6, minimum leaf size 3) and XGBoost (180 estimators, depth 3, learning rate 0.04, subsample and column subsample 0.8, L2 penalty 2) on up to 100 held-out examples from the seed-42 split. Standardised Gaussian noise was added at SD 0.01, 0.05 and 0.10 using a NumPy generator initialised with seed 42; feature rankings were compared with rank-biased overlap (persistence 0.9).
 
 ### 2.9 Exploratory subgroup audit
 
