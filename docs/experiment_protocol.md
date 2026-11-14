@@ -122,5 +122,5 @@ The CI workflow configures these commands and artifact upload. A workflow defini
 - Paired differences: 1,050 rows across ten metrics.
 - Held-out predictions: 40,320 rows.
 - Workflow artifact: `clinassist-research-results`, 1,103,140 bytes compressed; SHA-256 `934d18546c3147797e3a48900b9956e2e8fd463965c651e1fe6a890ff258b222`.
-- The workflow is being amended to persist the five shift-study result files and Pima provenance manifest in Git, rather than relying only on the 90-day Actions artifact.
+- The workflow committed the five shift-study result files and Pima provenance manifest in Git at commit `6764354763d2fb3e0568e597942ecff628e110c3`; the Actions artifact remains an additional 90-day copy.
 - No benchmark source CSV is committed. The manifest records OpenML dataset ID 37, 768 rows, class counts and the retrieved CSV checksum.
