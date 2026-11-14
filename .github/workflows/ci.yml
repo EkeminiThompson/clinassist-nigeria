@@ -105,7 +105,9 @@ jobs:
                  "successful_intervals": len(successful),
                  "explicitly_suppressed_sparse_rows": int((bootstrap["status"] == "insufficient subgroup events").sum())})
           PY
-      - name: Commit reproducible seven-scenario shift-study outputs
+      - name: Generate exact paired sign-flip tests
+        run: PYTHONPATH=$PWD python -m ml.analysis.paired_sign_flip_tests
+      - name: Commit reproducible research outputs
         if: success() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -113,25 +115,32 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           if git ls-files --error-unmatch ml/artifacts/experiments/synthetic_shift_runs.csv >/dev/null 2>&1; then
-            echo "Reviewed shift-study outputs are already versioned; preserving this run's artifact without rewriting the committed snapshot."
+            echo "Reviewed shift-study outputs are already versioned; preserving this run's shift-study snapshot."
+            git checkout -- ml/datasets/pima_manifest.json
+            git checkout -- ml/artifacts/experiments/synthetic_shift_study.json
+            git checkout -- ml/artifacts/experiments/synthetic_shift_runs.csv
+            git checkout -- ml/artifacts/experiments/synthetic_shift_summary.csv
+            git checkout -- ml/artifacts/experiments/synthetic_shift_paired_differences.csv
+            git checkout -- ml/artifacts/experiments/synthetic_shift_predictions.csv
           else
-            if git ls-files --error-unmatch ml/datasets/pima_manifest.json >/dev/null 2>&1; then
-              git checkout -- ml/datasets/pima_manifest.json
-            else
-              git add ml/datasets/pima_manifest.json
-            fi
+            git add ml/datasets/pima_manifest.json
             git add -f \
               ml/artifacts/experiments/synthetic_shift_study.json \
               ml/artifacts/experiments/synthetic_shift_runs.csv \
               ml/artifacts/experiments/synthetic_shift_summary.csv \
               ml/artifacts/experiments/synthetic_shift_paired_differences.csv \
               ml/artifacts/experiments/synthetic_shift_predictions.csv
-            if git diff --cached --quiet; then
-              echo "No shift-study output changes to commit."
-            else
-              git commit -m "Add reproducible seven-scenario shift-study outputs"
-              git push origin "HEAD:${GITHUB_HEAD_REF}"
-            fi
+          fi
+          git add -f \
+            ml/artifacts/experiments/explanation_stability.csv \
+            ml/artifacts/experiments/subgroup_metrics.csv \
+            ml/artifacts/experiments/subgroup_paired_bootstrap.csv \
+            ml/artifacts/experiments/paired_sign_flip_tests.csv
+          if git diff --cached --quiet; then
+            echo "No new research outputs to commit."
+          else
+            git commit -m "Archive raw explanation, subgroup, and paired-test outputs"
+            git push origin "HEAD:${GITHUB_HEAD_REF}"
           fi
       - name: Upload benchmark, predictions, and analysis outputs
         if: always()
