@@ -112,22 +112,26 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if git ls-files --error-unmatch ml/datasets/pima_manifest.json >/dev/null 2>&1; then
-            git checkout -- ml/datasets/pima_manifest.json
+          if git ls-files --error-unmatch ml/artifacts/experiments/synthetic_shift_runs.csv >/dev/null 2>&1; then
+            echo "Reviewed shift-study outputs are already versioned; preserving this run's artifact without rewriting the committed snapshot."
           else
-            git add ml/datasets/pima_manifest.json
-          fi
-          git add -f \
-            ml/artifacts/experiments/synthetic_shift_study.json \
-            ml/artifacts/experiments/synthetic_shift_runs.csv \
-            ml/artifacts/experiments/synthetic_shift_summary.csv \
-            ml/artifacts/experiments/synthetic_shift_paired_differences.csv \
-            ml/artifacts/experiments/synthetic_shift_predictions.csv
-          if git diff --cached --quiet; then
-            echo "No shift-study output changes to commit."
-          else
-            git commit -m "Add reproducible seven-scenario shift-study outputs"
-            git push origin "HEAD:${GITHUB_HEAD_REF}"
+            if git ls-files --error-unmatch ml/datasets/pima_manifest.json >/dev/null 2>&1; then
+              git checkout -- ml/datasets/pima_manifest.json
+            else
+              git add ml/datasets/pima_manifest.json
+            fi
+            git add -f \
+              ml/artifacts/experiments/synthetic_shift_study.json \
+              ml/artifacts/experiments/synthetic_shift_runs.csv \
+              ml/artifacts/experiments/synthetic_shift_summary.csv \
+              ml/artifacts/experiments/synthetic_shift_paired_differences.csv \
+              ml/artifacts/experiments/synthetic_shift_predictions.csv
+            if git diff --cached --quiet; then
+              echo "No shift-study output changes to commit."
+            else
+              git commit -m "Add reproducible seven-scenario shift-study outputs"
+              git push origin "HEAD:${GITHUB_HEAD_REF}"
+            fi
           fi
       - name: Upload benchmark, predictions, and analysis outputs
         if: always()
