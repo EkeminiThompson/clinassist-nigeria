@@ -44,7 +44,9 @@ FastAPI backend, React frontend (PWA path), experiment pipeline under `ml/`. See
 
 ## Citation
 
-Thompson, E. Evaluating Calibration, Model Robustness and Domain Adaptation in Diabetes Prediction Across Changing Data Distributions. Research manuscript, `EkeminiThompson/clinassist-nigeria` (2026).
+**Software archive:** Thompson, E. (2026). *ClinAssist Nigeria: Calibration, Domain Adaptation and Explanation Stability Benchmark* (v0.1.0). Zenodo. https://doi.org/10.5281/zenodo.24215668
+
+**Manuscript:** Thompson, E. Evaluating Calibration, Model Robustness and Domain Adaptation in Diabetes Prediction Across Changing Data Distributions. Research manuscript, `EkeminiThompson/clinassist-nigeria` (2026).
 
 
 ## Repeated-shift experiment outputs
