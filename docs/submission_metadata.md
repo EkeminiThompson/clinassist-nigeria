@@ -13,9 +13,9 @@ Suggested cover-letter salutation once confirmed: `Dear Dr. Agbogun,`
 
 ## Computing hardware statement
 
-The research CI workflow is pinned to GitHub-hosted `ubuntu-24.04` (x86-64), with Python 3.11. GitHub documents standard public-repository `ubuntu-24.04` runners as 4 vCPUs and 16 GB RAM. The CI workflow logs the actual CPU model, OS release, kernel and memory for each run.
+The author's reported local development workstation is a 13-inch MacBook Pro (Mid-2012; model identifier `MacBookPro9,2`), Intel Core i5 at 2.5 GHz, two CPU cores, 8 GB RAM, Mac OS X 10.15.8 (build 19H2026). This is the workstation configuration supplied by the author; do not claim that a particular historical experiment was run on it unless contemporaneous logs confirm that.
 
-This describes the CI reproduction environment only. The CPU, RAM and OS for the original reported experiment and the 2026-11-13 independent verification run were not recorded. Do not retrospectively assign CI specifications to those runs. If a later CI run supplies the results used in the final tables, cite that run ID and report the captured hardware from its log.
+The research CI workflow is pinned to GitHub-hosted `ubuntu-24.04` (x86-64), with Python 3.11. GitHub documents standard public-repository `ubuntu-24.04` runners as 4 vCPUs and 16 GB RAM. The CI workflow logs the actual CPU model, OS release, kernel and memory for each run. These are separate computing environments and must be reported separately.
 
 ## ACM author-year bibliography using BibLaTeX
 
