@@ -153,6 +153,14 @@ Analysis code, experiment manifests, provenance documentation and independent ve
 
 
 
+
+## Appendix A. Computing environment
+
+The repository's reproducibility workflow runs the research-benchmark job on a GitHub-hosted `ubuntu-24.04` x86-64 runner. For public repositories, GitHub documents the standard runner configuration as 4 vCPUs and 16 GB RAM. The workflow records the actual CPU model, logical CPU count, memory and operating-system release in the run log for each execution. The Python environment for this workflow is Python 3.11, as configured in `.github/workflows/ci.yml`.
+
+**Important distinction:** these are the specifications of the current CI reproduction environment, not verified specifications of the historical experiment run or the independent clean-environment verification dated 2026-11-13. The original run's CPU model, RAM and operating system were not retained and cannot be reconstructed from the reported metrics. Do not attribute the CI hardware to those earlier runs.
+
+
 ## Appendix B. Complete seven-scenario paired comparison
 
 The complete repeated-split outputs are committed under `ml/artifacts/experiments/`. The table below reports the mean (SD) across five paired split-level differences, calculated as CORAL minus source-only from the unrounded run-level metrics. Negative Brier and ECE differences indicate lower error; positive AUROC differences indicate improved discrimination. These are descriptive paired differences on the public Pima benchmark under controlled transformations, not external validation.
@@ -182,9 +190,3 @@ The complete repeated-split outputs are committed under `ml/artifacts/experiment
 | combined_severe | Random forest | +0.0362 (0.0281) | −0.0670 (0.0089) | −0.1407 (0.0134) |
 
 The table contains all 21 model-by-scenario comparisons. The committed files retain all 210 split/model/scenario/adaptation metric rows, 1,050 paired metric differences and 40,320 held-out prediction rows. The rounded summary CSV contains 42 model-by-scenario-by-adaptation rows. The full JSON manifest preserves the run-level metric values.
-
-## Appendix A. Computing environment
-
-The repository's reproducibility workflow runs the research-benchmark job on a GitHub-hosted `ubuntu-24.04` x86-64 runner. For public repositories, GitHub documents the standard runner configuration as 4 vCPUs and 16 GB RAM. The workflow records the actual CPU model, logical CPU count, memory and operating-system release in the run log for each execution. The Python environment for this workflow is Python 3.11, as configured in `.github/workflows/ci.yml`.
-
-**Important distinction:** these are the specifications of the current CI reproduction environment, not verified specifications of the historical experiment run or the independent clean-environment verification dated 2026-11-13. The original run's CPU model, RAM and operating system were not retained and cannot be reconstructed from the reported metrics. Do not attribute the CI hardware to those earlier runs.
