@@ -111,3 +111,16 @@ The audit consumes `synthetic_shift_predictions.csv`, verifies each held-out lab
 ## Evidence limitations
 
 The CI workflow configures these commands and artifact upload. A workflow definition does not prove that a particular run completed successfully. For manuscript submission, retain the successful run ID, commit SHA, artifact bundle and exact unrounded CSVs used to produce every reported table. Record the actual run environment (Python and package versions, OS, CPU and RAM) separately. Do not infer the historical experiment environment from the current CI runner or a later clean verification run.
+
+
+## Verified execution record
+
+- Successful GitHub Actions run: **#156**, run ID `43558361142`.
+- Source commit: `bc8611e42eac4832e5260804fb31bae1736fd17e`.
+- All seven scenarios completed for seeds 42–46, three models and two adaptation arms: 210 run-level rows.
+- Summary: 42 model/scenario/adaptation rows.
+- Paired differences: 1,050 rows across ten metrics.
+- Held-out predictions: 40,320 rows.
+- Workflow artifact: `clinassist-research-results`, 1,103,140 bytes compressed; SHA-256 `934d18546c3147797e3a48900b9956e2e8fd463965c651e1fe6a890ff258b222`.
+- The workflow is being amended to persist the five shift-study result files and Pima provenance manifest in Git, rather than relying only on the 90-day Actions artifact.
+- No benchmark source CSV is committed. The manifest records OpenML dataset ID 37, 768 rows, class counts and the retrieved CSV checksum.
