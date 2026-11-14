@@ -1,12 +1,15 @@
 # Explanation Stability and Subgroup Audit under Controlled Distribution Shift for Tabular Diabetes Risk Models
 
-**Author:** Ekemini Thompson  
+**Author:** Ekemini Thompson¹  
+**Affiliations:** ¹Nnamdi Azikiwe University, Awka, Anambra State, Nigeria; ²VergelAI  
+**Corresponding author:** Ekemini Thompson, ekemini.thompson@outlook.com  
+**ORCID:** [0009-0006-0072-3905](https://orcid.org/0009-0006-0072-3905)  
 **Status:** Supplementary technical report to the calibration and domain-adaptation manuscript  
 **Study type:** Exploratory sensitivity and subgroup audit on a public benchmark
 
 ## Abstract
 
-Post-hoc explanation methods such as TreeSHAP provide feature-attribution summaries for individual predictions. Explanation stability under input perturbation is distinct from explanation validity. This report quantifies local TreeSHAP rank stability under standardised perturbations and reports an age- and body-mass-index-stratified audit with paired within-split bootstrap intervals for source-only versus CORAL predictions on the public Pima Indians Diabetes benchmark under controlled synthetic shift. Mean rank-biased overlap for random forest ranged from 0.994 to 0.963 across increasing noise levels; for XGBoost the range was 0.971 to 0.952. The subgroup audit produced 1,638 metric rows and 819 paired comparisons, of which 609 yielded usable intervals. Under combined severe shift, paired bootstrap intervals showed lower Brier scores for CORAL in all 15 model-by-seed comparisons.
+Post-hoc explanation methods such as TreeSHAP provide feature-attribution summaries for individual predictions. Explanation stability under input perturbation is distinct from explanation validity. This report quantifies local TreeSHAP rank stability under standardised perturbations and reports an age- and body-mass-index-stratified audit with paired within-split bootstrap intervals for source-only versus CORAL predictions on the public Pima Indians Diabetes benchmark under controlled synthetic shift. Mean rank-biased overlap for random forest ranged from 0.994 to 0.963 across increasing noise levels; for XGBoost the range was 0.971 to 0.952. The subgroup audit produced 1,638 metric rows and 819 paired comparisons, of which 609 yielded usable intervals. Under combined severe shift, paired bootstrap intervals showed lower Brier scores for CORAL in all 15 model-by-seed comparisons. AUROC intervals excluded zero in 6 of 15 comparisons and AUPRC intervals excluded zero in 5 of 15 comparisons. These are exploratory paired-bootstrap findings, not confirmatory hypothesis tests.
 
 **Keywords:** TreeSHAP; explanation stability; rank-biased overlap; subgroup analysis; paired bootstrap; domain adaptation.
 

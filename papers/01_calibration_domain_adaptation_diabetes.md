@@ -1,8 +1,10 @@
 # Evaluating Calibration, Model Robustness and Domain Adaptation in Diabetes Prediction Across Changing Data Distributions
 
-**Author:** Ekemini Thompson  
-**Affiliation:** Nnamdi Azikiwe University, Awka, Nigeria  
-**Manuscript status:** Research manuscript (v1.0) — results independently verified (2026-11-13)  
+**Author:** Ekemini Thompson¹˒²  
+**Affiliations:** ¹Nnamdi Azikiwe University, Awka, Anambra State, Nigeria; ²VergelAI  
+**Corresponding author:** Ekemini Thompson, ekemini.thompson@outlook.com  
+**ORCID:** [0009-0006-0072-3905](https://orcid.org/0009-0006-0072-3905)  
+**Manuscript status:** Research manuscript (v1.1) — results independently verified (2026-11-13)  
 **Study type:** Reproducible computational benchmark study
 
 ## Abstract
@@ -59,15 +61,27 @@ Five random seeds (42–46). Stratified 75:25 train/test partitions (576 trainin
 
 ### 2.4 Classifiers and probability calibration
 
-Logistic regression (balanced class weights), random forest (250 trees, max depth 6), and histogram gradient boosting (150 iterations). Each classifier used sigmoid probability calibration with three-fold cross-validation on source-training data.
+Logistic regression (class_weight=balanced), random forest (250 trees; maximum depth 6), and scikit-learn histogram gradient boosting (150 boosting iterations) were used in the shift study. Each shift-study classifier used sigmoid probability calibration with three-fold cross-validation on source-training data. These settings describe the shift-study models, not the separate uncalibrated baseline comparison in Table 1. The baseline experiment used scikit-learn's `GradientBoostingClassifier` for its gradient-boosting row, not `HistGradientBoostingClassifier`; its pooled out-of-fold metrics are reported separately and must not be directly compared with the repeated-split, calibrated shift-study results. Full estimator constructor arguments and XGBoost-specific TreeSHAP model settings must be verified against the executed experiment scripts before submission.
 
-### 2.5 Controlled target-domain scenarios
+### 2.5 Prespecified shift scenarios and parameters
 
-Seven scenarios on the held-out feature matrix: reference; mild covariate shift; severe covariate shift; MCAR-like 10%; MAR-like 10%; combined mild; combined severe. Target labels used only for evaluation.
+The seven target-domain conditions comprise an unshifted reference condition, mild covariate shift, severe covariate shift, 10% missing-completely-at-random (MCAR), 10% glucose-dependent missing-at-random (MAR), combined mild shift, and combined severe shift. Covariate transformations are applied to raw held-out values before the zero-to-missing preprocessing step; consequently, some recorded zeros can become non-zero in shifted scenarios and will not subsequently be recoded as missing. This ordering is retained as a methodological limitation. Covariate-shift severity is 0.5 (mild) or 1.5 (severe). The combined mild condition applies severity 0.5 with 10% MCAR missingness; the combined severe condition applies severity 1.5 with 20% glucose-dependent MAR missingness. The single-mechanism missingness conditions use 10% missingness. The severe-combined result tables in this manuscript therefore refer to 20%, not 10%, missingness.
+
+The manuscript records the scenario-level rates and severity values available in the experiment documentation. The exact feature-wise transformation equations and per-scenario random seeds must be checked against the versioned experiment script before submission; they are not reconstructed from outcome tables.
 
 ### 2.6 Domain adaptation
 
-Source-only arm fitted the calibrated classifier to preprocessed source-training data. CORAL arm aligned source and target second-order statistics using unlabelled target covariates, then fitted the classifier to transformed source data. Target labels were not used for adaptation.
+The source-only arm fits the model using source-training data. In the CORAL arm, the target feature matrix is used without target labels to align source and target means and covariance structure. This is transductive unsupervised adaptation: target covariates are available during adaptation, but target outcomes are reserved for evaluation.
+
+For source matrix $X_s$ and target matrix $X_t$, let $\mu_s$ and $\mu_t$ denote feature means and let $C_s$ and $C_t$ denote regularised covariance matrices, with $C=\operatorname{Cov}(X)+\epsilon I$ and $\epsilon=10^{-5}$. The source-to-target transformation is:
+
+$
+X_{s\rightarrow t}=(X_s-\mu_s)C_s^{-1/2}C_t^{1/2}+\mu_t.
+$
+
+This expression describes both mean and covariance alignment. It must be checked against the exact implementation before submission; target labels are not used to estimate either alignment statistic.
+
+
 
 ### 2.7 Performance metrics
 
@@ -81,6 +95,10 @@ TreeSHAP for random forest and XGBoost on 100 held-out examples; Gaussian noise 
 
 Age and BMI strata with eligibility ≥20 observations and ≥5 events per class. Paired bootstrap (1,000 draws) for source-only versus CORAL. Sparse strata suppressed.
 
+### 2.10 Software environment
+
+The independent verification report records Python 3.12, scikit-learn 1.9.1 and XGBoost 3.4.1 for the clean verification run dated 2026-11-13. These versions are not asserted to be the exact environment of every original experiment run. The remaining dependency versions and hardware for the original table-producing run must be captured from its environment manifest before final submission.
+
 ## 3. Results
 
 ### 3.1 Baseline five-fold benchmark
@@ -89,7 +107,7 @@ Age and BMI strata with eligibility ≥20 observations and ≥5 events per class
 |---|---:|---:|---:|---:|
 | Logistic regression | 0.8349 | 0.7067 | 0.1571 | 0.0360 |
 | Random forest | 0.8342 | 0.6977 | 0.1574 | 0.0398 |
-| Gradient boosting | 0.8265 | 0.6927 | 0.1676 | 0.0839 |
+| `GradientBoostingClassifier` | 0.8265 | 0.6927 | 0.1676 | 0.0839 |
 | XGBoost | 0.8247 | 0.6920 | 0.1643 | 0.0642 |
 | RBF SVM | 0.8211 | 0.6967 | 0.1642 | 0.0548 |
 

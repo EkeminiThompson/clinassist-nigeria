@@ -6,6 +6,8 @@ Publication package for a reproducible computational benchmark study of discrimi
 
 | Resource | Location |
 |---|---|
+| Software licence | [`LICENSE`](LICENSE) — MIT for repository code |
+| Manuscript reproducibility status | [`docs/manuscript_reproducibility_status.md`](docs/manuscript_reproducibility_status.md) |
 | Primary manuscript | [`papers/01_calibration_domain_adaptation_diabetes.md`](papers/01_calibration_domain_adaptation_diabetes.md) |
 | Supplementary audit | [`papers/02_explanation_stability_subgroup_audit.md`](papers/02_explanation_stability_subgroup_audit.md) |
 | Independent verification | [`docs/independent_verification.md`](docs/independent_verification.md) |
