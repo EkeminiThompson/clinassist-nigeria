@@ -19,27 +19,27 @@ This describes the CI reproduction environment only. The CPU, RAM and OS for the
 
 ## ACM author-year bibliography using BibLaTeX
 
-For an ACM venue that explicitly requires author-year references, use the ACM-supported BibLaTeX `acmauthoryear` style. In the `acmart` document class, disable natbib integration, remove any `\\citestyle{acmauthoryear}` command, load BibLaTeX with the ACM data model, add the .bib resource, and print the bibliography:
+For an ACM venue that explicitly requires author-year references, use the ACM-supported BibLaTeX `acmauthoryear` style. In the `acmart` document class, disable natbib integration, remove any `\citestyle{acmauthoryear}` command, load BibLaTeX with the ACM data model, add the .bib resource, and print the bibliography:
 
 ```latex
-\\documentclass[manuscript,natbib=false]{acmart}
+\documentclass[manuscript,natbib=false]{acmart}
 
-\\RequirePackage[
+\RequirePackage[
   datamodel=acmdatamodel,
   style=acmauthoryear
 ]{biblatex}
 
-\\addbibresource{references.bib}
+\addbibresource{references.bib}
 
-\\begin{document}
+\begin{document}
 
 % manuscript content
 
-\\printbibliography
-\\end{document}
+\printbibliography
+\end{document}
 ```
 
-Do not combine this BibLaTeX setup with the BibTeX commands `\\bibliographystyle{ACM-Reference-Format}` or `\\bibliography{references}`. Confirm that the target ACM journal or conference actually requires author-year style; most ACM venues default to numeric citations. The final template and journal instructions take precedence.
+Do not combine this BibLaTeX setup with the BibTeX commands `\bibliographystyle{ACM-Reference-Format}` or `\bibliography{references}`. Confirm that the target ACM journal or conference actually requires author-year style; most ACM venues default to numeric citations. The final template and journal instructions take precedence.
 
 ## Zenodo deposit (optional; not yet deposited)
 
