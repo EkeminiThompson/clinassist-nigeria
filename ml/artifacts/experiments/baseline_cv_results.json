@@ -27,11 +27,11 @@
       "f1": 0.6201232032854209,
       "sensitivity": 0.5634328358208955,
       "specificity": 0.864,
-      "brier": 0.15742907381265517,
+      "brier": 0.15742907381265514,
       "ece": 0.03978972568994196,
-      "calibration_intercept_in_large": -0.0026380320022343752,
-      "calibration_intercept": 0.06862924951187004,
-      "calibration_slope": 1.1799992088897562
+      "calibration_intercept_in_large": -0.0026380320022346107,
+      "calibration_intercept": 0.06862928067257433,
+      "calibration_slope": 1.1799992139090758
     },
     "gradient_boosting": {
       "auroc": 0.8265373134328358,
