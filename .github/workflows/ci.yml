@@ -66,6 +66,8 @@ jobs:
           pip install -r backend/requirements.txt
       - name: Retrieve and validate public benchmark
         run: PYTHONPATH=$PWD python -m ml.datasets.download_pima
+      - name: Run five-fold baseline experiment and retain out-of-fold predictions
+        run: PYTHONPATH=$PWD python -m ml.experiments.run_baselines
       - name: Run repeated synthetic-shift experiment
         run: PYTHONPATH=$PWD python -m ml.experiments.run_shift_study --repeats 5
       - name: Run TreeSHAP explanation stability experiment
@@ -132,6 +134,8 @@ jobs:
               ml/artifacts/experiments/synthetic_shift_predictions.csv
           fi
           git add -f \
+            ml/artifacts/experiments/baseline_cv_results.json \
+            ml/artifacts/experiments/baseline_cv_predictions.csv \
             ml/artifacts/experiments/explanation_stability.csv \
             ml/artifacts/experiments/explanation_stability_raw.csv \
             ml/artifacts/experiments/subgroup_metrics.csv \
