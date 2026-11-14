@@ -1,6 +1,6 @@
 # Publication readiness — ClinAssist Nigeria
 
-**Package date:** 2026-11-13  
+**Package date:** 2026-11-14  
 **Primary manuscript:** papers/01_calibration_domain_adaptation_diabetes.md  
 **Supplementary:** papers/02_explanation_stability_subgroup_audit.md  
 
@@ -10,13 +10,19 @@
 2. Supplementary TreeSHAP stability and subgroup audit report with audit counts.
 3. Independent clean-environment experiment rerun (2026-11-13): baseline five-fold metrics match the archived manuscript table; CORAL reduces ECE under controlled age and BMI shifts.
 4. Dataset provenance documentation (Pima / OpenML only; no Nigerian hospital claim).
-5. Reproducible experiment pipeline under `ml/experiments/` with CI artifact history.
+5. Executable experiment scripts and CI workflow configuration are present. The existence of the workflow is not itself proof that a particular table-producing run succeeded; retrieve and verify the matching run artifacts before submission.
 
 ## Scope of the scientific claim
 
 - Methodological evaluation of discrimination, calibration, selective prediction, and explanation stability under controlled shift on a public diabetes benchmark.
 - Scenario- and model-dependent behaviour of unsupervised CORAL.
 - No claim of Nigerian multi-hospital external validation, clinical utility, or deployment readiness.
+
+## Remaining author / journal steps
+
+- Retrieve the exact successful CI or archived run artifact for the manuscript results; reconcile all seven scenario summaries and paired AUROC differences from unrounded split-level output.
+- Confirm original-run hardware, operating system, complete package versions and whether any hyperparameter search was performed.
+- Review the exact shift equations, random seeds and CORAL mapping in `docs/experiment_protocol.md` against the final manuscript.
 
 ## Author / journal steps (outside the repository)
 
