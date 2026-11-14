@@ -101,7 +101,7 @@ def _average_precision_batch(labels: np.ndarray, scores: np.ndarray) -> np.ndarr
     ) / labels.sum(axis=1)
 
 
-def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
+def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng, return_draws=False):
     """Vectorised patient bootstrap; CORAL and source-only share each draw."""
     y = _validate_vectors(y, p_source, p_coral)
     ps = np.asarray(p_source, dtype=float)
@@ -111,11 +111,14 @@ def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
         for metric in ("auroc", "auprc", "brier")
         for suffix in ("delta", "ci_lower", "ci_upper")
     }
+    def finish(result, draws):
+        return (result, draws) if return_draws else result
+
     if len(y) < MIN_N or y.sum() < MIN_CLASS or (len(y) - y.sum()) < MIN_CLASS:
-        return {
+        return finish({
             "valid_replicates": 0, **empty,
             "status": "insufficient subgroup events",
-        }, {metric: np.asarray([], dtype=float) for metric in ("auroc", "auprc", "brier")}
+        }, {metric: np.asarray([], dtype=float) for metric in ("auroc", "auprc", "brier")})
 
     n = len(y)
     deltas = {"auroc": [], "auprc": [], "brier": []}
@@ -156,10 +159,10 @@ def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
 
     result = {"valid_replicates": int(valid)}
     if valid < int(n_bootstrap * MIN_VALID_FRACTION):
-        return {
+        return finish({
             **result, **empty,
             "status": "too few valid bootstrap replicates",
-        }, {metric: np.asarray(values, dtype=float) for metric, values in deltas.items()}
+        }, {metric: np.asarray(values, dtype=float) for metric, values in deltas.items()})
 
     for metric, values in deltas.items():
         values = np.asarray(values, dtype=float)
@@ -167,7 +170,7 @@ def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
         result[f"{metric}_ci_lower"] = float(np.quantile(values, 0.025))
         result[f"{metric}_ci_upper"] = float(np.quantile(values, 0.975))
     result["status"] = "ok"
-    return result, {metric: np.asarray(values, dtype=float) for metric, values in deltas.items()}
+    return finish(result, {metric: np.asarray(values, dtype=float) for metric, values in deltas.items()})
 
 
 def run_audit(n_bootstrap=1000, seed=2026):
@@ -258,7 +261,7 @@ def run_audit(n_bootstrap=1000, seed=2026):
                     y_source,
                     wide[("probability", "source_only")].to_numpy(),
                     wide[("probability", "coral")].to_numpy(),
-                    n_bootstrap, rng,
+                    n_bootstrap, rng, return_draws=True,
                 )
                 bootstrap_rows.append({
                     "subgroup_type": group_col, "subgroup": label,
