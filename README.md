@@ -13,6 +13,7 @@ Publication package for a reproducible computational benchmark study of discrimi
 | Independent verification | [`docs/independent_verification.md`](docs/independent_verification.md) |
 | Publication readiness | [`docs/publication_readiness.md`](docs/publication_readiness.md) |
 | Dataset provenance | [`docs/dataset_provenance.md`](docs/dataset_provenance.md) |
+| Exact experiment protocol | [`docs/experiment_protocol.md`](docs/experiment_protocol.md) |
 
 ## Key results (independently verified 2026-11-13)
 
@@ -28,12 +29,14 @@ Publication package for a reproducible computational benchmark study of discrimi
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r backend/requirements.txt
 export PYTHONPATH="$PWD"
-python -m ml.datasets.download_pima   # if present
+python -m ml.datasets.download_pima
 python -m ml.experiments.run_baselines
-python -m ml.experiments.run_domain_adaptation
+python -m ml.experiments.run_shift_study --repeats 5
+python -m ml.experiments.run_explanation_stability --seed 42 --n-explain 100
+python -m ml.experiments.run_subgroup_statistical_audit --bootstrap 1000 --seed 2026
 ```
 
-Outputs: `ml/artifacts/experiments/`.
+Outputs are written to `ml/artifacts/experiments/`. The shift study writes the raw split-level metrics, patient-level predictions, summary table, paired differences and JSON manifest used by the subgroup audit. The subgroup audit must be run after the shift study.
 
 ## Software stack
 
@@ -42,3 +45,12 @@ FastAPI backend, React frontend (PWA path), experiment pipeline under `ml/`. See
 ## Citation
 
 Thompson, E. Evaluating Calibration, Model Robustness and Domain Adaptation in Diabetes Prediction Across Changing Data Distributions. Research manuscript, `EkeminiThompson/clinassist-nigeria` (2026).
+
+
+## Repeated-shift experiment outputs
+
+The seven-scenario, five-seed shift-study outputs are stored under `ml/artifacts/experiments/` after the reproducibility CI commit. See `docs/experiment_protocol.md` for the verified run record and `papers/01_calibration_domain_adaptation_diabetes.md` Appendix B for the paired scenario comparison.
+
+## Submission and archiving metadata
+
+See [submission metadata and template instructions](docs/submission_metadata.md) for the computing-environment statement, Associate Editor confirmation note, ACM author-year BibLaTeX setup, and optional Zenodo deposit preparation.

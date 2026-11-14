@@ -37,10 +37,26 @@ jobs:
       - run: npm install
       - run: npm run build
   research-benchmarks:
-    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref }}
+      - name: Record reproduction hardware and operating system
+        run: |
+          echo "=== Operating system ==="
+          cat /etc/os-release
+          echo "=== Kernel ==="
+          uname -a
+          echo "=== CPU ==="
+          lscpu
+          echo "=== Memory ==="
+          grep -E 'MemTotal|MemAvailable' /proc/meminfo
+          echo "=== Python ==="
+          python3 --version
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -89,6 +105,34 @@ jobs:
                  "successful_intervals": len(successful),
                  "explicitly_suppressed_sparse_rows": int((bootstrap["status"] == "insufficient subgroup events").sum())})
           PY
+      - name: Commit reproducible seven-scenario shift-study outputs
+        if: success() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-files --error-unmatch ml/artifacts/experiments/synthetic_shift_runs.csv >/dev/null 2>&1; then
+            echo "Reviewed shift-study outputs are already versioned; preserving this run's artifact without rewriting the committed snapshot."
+          else
+            if git ls-files --error-unmatch ml/datasets/pima_manifest.json >/dev/null 2>&1; then
+              git checkout -- ml/datasets/pima_manifest.json
+            else
+              git add ml/datasets/pima_manifest.json
+            fi
+            git add -f \
+              ml/artifacts/experiments/synthetic_shift_study.json \
+              ml/artifacts/experiments/synthetic_shift_runs.csv \
+              ml/artifacts/experiments/synthetic_shift_summary.csv \
+              ml/artifacts/experiments/synthetic_shift_paired_differences.csv \
+              ml/artifacts/experiments/synthetic_shift_predictions.csv
+            if git diff --cached --quiet; then
+              echo "No shift-study output changes to commit."
+            else
+              git commit -m "Add reproducible seven-scenario shift-study outputs"
+              git push origin "HEAD:${GITHUB_HEAD_REF}"
+            fi
+          fi
       - name: Upload benchmark, predictions, and analysis outputs
         if: always()
         uses: actions/upload-artifact@v4

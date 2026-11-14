@@ -57,17 +57,19 @@ Five predictors—glucose, blood pressure, skin thickness, insulin and BMI—wer
 
 ### 2.3 Repeated source/target splits
 
-Five random seeds (42–46). Stratified 75:25 train/test partitions (576 training, 192 held-out). Repeated random splits describe split-to-split variability; they are not independent external validations.
+For each seed 42–46, `train_test_split` generated a stratified 75:25 partition (576 source-training and 192 held-out target rows). The split seed was the integer seed itself. Repeated random splits describe split-to-split variability; they are not independent external validations.
 
 ### 2.4 Classifiers and probability calibration
 
-Logistic regression (class_weight=balanced), random forest (250 trees; maximum depth 6), and scikit-learn histogram gradient boosting (150 boosting iterations) were used in the shift study. Each shift-study classifier used sigmoid probability calibration with three-fold cross-validation on source-training data. These settings describe the shift-study models, not the separate uncalibrated baseline comparison in Table 1. The baseline experiment used scikit-learn's `GradientBoostingClassifier` for its gradient-boosting row, not `HistGradientBoostingClassifier`; its pooled out-of-fold metrics are reported separately and must not be directly compared with the repeated-split, calibrated shift-study results. Full estimator constructor arguments and XGBoost-specific TreeSHAP model settings must be verified against the executed experiment scripts before submission.
+The shift study used (i) logistic regression with `max_iter=1500`, `class_weight="balanced"`; (ii) random forest with 250 trees, maximum depth 6, minimum leaf size 3, balanced class weights and all available CPU workers; and (iii) scikit-learn histogram gradient boosting with 150 iterations, learning rate 0.06, at most 15 leaf nodes and L2 regularisation 1.0. Estimator random states were set to the corresponding split seed. Each estimator was wrapped in sigmoid probability calibration using three-fold cross-validation on source-training data (`CalibratedClassifierCV`, `cv=3`). The preprocessor was fitted only on source-training features in each split. These settings describe the shift-study models, not the separate baseline comparison in Table 1.
+
+The baseline experiment used scikit-learn's `GradientBoostingClassifier`, not `HistGradientBoostingClassifier`. Its five-fold out-of-fold comparison used logistic regression (`max_iter=1000`), random forest (200 trees, maximum depth 6), gradient boosting (150 estimators, maximum depth 3), XGBoost (150 estimators, depth 3, learning rate 0.1, row and column subsampling 0.8) and RBF SVM with probability estimates. The baseline split generator was shuffled stratified five-fold cross-validation with seed 42. These pooled out-of-fold baseline metrics must not be directly compared with the repeated-split, calibrated shift-study results. Exact settings are recorded in the executable experiment scripts.
 
 ### 2.5 Prespecified shift scenarios and parameters
 
 The seven target-domain conditions comprise an unshifted reference condition, mild covariate shift, severe covariate shift, 10% missing-completely-at-random (MCAR), 10% glucose-dependent missing-at-random (MAR), combined mild shift, and combined severe shift. Covariate transformations are applied to raw held-out values before the zero-to-missing preprocessing step; consequently, some recorded zeros can become non-zero in shifted scenarios and will not subsequently be recoded as missing. This ordering is retained as a methodological limitation. Covariate-shift severity is 0.5 (mild) or 1.5 (severe). The combined mild condition applies severity 0.5 with 10% MCAR missingness; the combined severe condition applies severity 1.5 with 20% glucose-dependent MAR missingness. The single-mechanism missingness conditions use 10% missingness. The severe-combined result tables in this manuscript therefore refer to 20%, not 10%, missingness.
 
-The manuscript records the scenario-level rates and severity values available in the experiment documentation. The exact feature-wise transformation equations and per-scenario random seeds must be checked against the versioned experiment script before submission; they are not reconstructed from outcome tables.
+The executable protocol applies these transformations to raw held-out features before zero-to-missing conversion, imputation and scaling. For severity `s` (0.5 or 1.5), glucose is transformed as `G' = G(1 + 0.15s) + 5s`, BMI as `B' = B(1 + 0.10s) + 1.5s`, and age as `A' = A(1 + 0.05s) + 2s`; other features are not directly shifted. For each split seed `r` (42–46), scenario index `j` (zero-based, in the order listed above) uses missingness RNG seed `r + 1000j`. MCAR independently masks every feature cell with probability 0.10. The MAR-like mechanism standardises shifted glucose within the held-out set to `z`, computes row probability `q_i = clip(2m/(1 + exp(-z_i)), 0, 1)`, where `m` is the configured missing rate, and independently masks skin thickness and insulin for each row using `q_i`. The combined severe condition therefore uses `m = 0.20`. The reference condition has no transformation or missingness. The exact implementation is in `ml/experiments/run_shift_study.py`; these are controlled perturbations, not observed population shifts.
 
 ### 2.6 Domain adaptation
 
@@ -79,7 +81,7 @@ $
 X_{s\rightarrow t}=(X_s-\mu_s)C_s^{-1/2}C_t^{1/2}+\mu_t.
 $
 
-This expression describes both mean and covariance alignment. It must be checked against the exact implementation before submission; target labels are not used to estimate either alignment statistic.
+The implementation uses the row-vector mapping `(X_s - mean_s) @ C_s^(-1/2) @ C_t^(1/2) + mean_t`, where the inverse square root is applied first and the target covariance square root second. The covariance matrices are regularised with epsilon (10^{-5}). The adapter's `fit(source_X, target_X)` interface accepts feature matrices only; target labels are not used to estimate either alignment statistic.
 
 
 
@@ -89,7 +91,7 @@ AUROC, AUPRC, Brier score, ten-bin ECE, calibration intercept and slope, selecti
 
 ### 2.8 Explanation stability
 
-TreeSHAP for random forest and XGBoost on 100 held-out examples; Gaussian noise at SD 0.01, 0.05, 0.10; rank-biased overlap (persistence 0.9).
+TreeSHAP for random forest (250 trees, depth 6, minimum leaf size 3) and XGBoost (180 estimators, depth 3, learning rate 0.04, subsample and column subsample 0.8, L2 penalty 2) on up to 100 held-out examples from the seed-42 split. Standardised Gaussian noise was added at SD 0.01, 0.05 and 0.10 using a NumPy generator initialised with seed 42; feature rankings were compared with rank-biased overlap (persistence 0.9).
 
 ### 2.9 Exploratory subgroup audit
 
@@ -148,3 +150,43 @@ The analysis uses a public historical benchmark and controlled synthetic shifts.
 ## 5. Data and code availability
 
 Analysis code, experiment manifests, provenance documentation and independent verification report: `EkeminiThompson/clinassist-nigeria`. Benchmark data retrieved from OpenML with recorded checksum.
+
+
+
+
+## Appendix A. Computing environment
+
+The repository's reproducibility workflow runs the research-benchmark job on a GitHub-hosted `ubuntu-24.04` x86-64 runner. For public repositories, GitHub documents the standard runner configuration as 4 vCPUs and 16 GB RAM. The workflow records the actual CPU model, logical CPU count, memory and operating-system release in the run log for each execution. The Python environment for this workflow is Python 3.11, as configured in `.github/workflows/ci.yml`.
+
+**Important distinction:** these are the specifications of the current CI reproduction environment, not verified specifications of the historical experiment run or the independent clean-environment verification dated 2026-11-13. The original run's CPU model, RAM and operating system were not retained and cannot be reconstructed from the reported metrics. Do not attribute the CI hardware to those earlier runs.
+
+
+## Appendix B. Complete seven-scenario paired comparison
+
+The complete repeated-split outputs are committed under `ml/artifacts/experiments/`. The table below reports the mean (SD) across five paired split-level differences, calculated as CORAL minus source-only from the unrounded run-level metrics. Negative Brier and ECE differences indicate lower error; positive AUROC differences indicate improved discrimination. These are descriptive paired differences on the public Pima benchmark under controlled transformations, not external validation.
+
+| Shift scenario | Model | ΔAUROC, mean (SD) | ΔBrier, mean (SD) | ΔECE, mean (SD) |
+|---|---|---:|---:|---:|
+| reference | Histogram gradient boosting | +0.0019 (0.0097) | −0.0005 (0.0040) | −0.0067 (0.0178) |
+| reference | Logistic regression | −0.0019 (0.0060) | +0.0005 (0.0024) | +0.0081 (0.0102) |
+| reference | Random forest | −0.0021 (0.0048) | +0.0009 (0.0020) | −0.0089 (0.0209) |
+| covariate_mild | Histogram gradient boosting | +0.0050 (0.0110) | −0.0056 (0.0052) | −0.0071 (0.0304) |
+| covariate_mild | Logistic regression | −0.0011 (0.0061) | −0.0084 (0.0023) | −0.0405 (0.0162) |
+| covariate_mild | Random forest | +0.0021 (0.0110) | −0.0057 (0.0050) | −0.0177 (0.0166) |
+| covariate_severe | Histogram gradient boosting | +0.0437 (0.0147) | −0.0585 (0.0052) | −0.1216 (0.0194) |
+| covariate_severe | Logistic regression | −0.0004 (0.0071) | −0.0907 (0.0076) | −0.2232 (0.0214) |
+| covariate_severe | Random forest | +0.0373 (0.0264) | −0.0619 (0.0079) | −0.1354 (0.0296) |
+| mcar_10 | Histogram gradient boosting | −0.0006 (0.0097) | +0.0004 (0.0043) | −0.0022 (0.0352) |
+| mcar_10 | Logistic regression | +0.0011 (0.0071) | −0.0010 (0.0030) | +0.0012 (0.0097) |
+| mcar_10 | Random forest | −0.0033 (0.0036) | +0.0010 (0.0015) | +0.0049 (0.0208) |
+| mar_like_10 | Histogram gradient boosting | +0.0007 (0.0081) | +0.0013 (0.0021) | −0.0076 (0.0301) |
+| mar_like_10 | Logistic regression | −0.0019 (0.0066) | +0.0009 (0.0027) | +0.0045 (0.0093) |
+| mar_like_10 | Random forest | −0.0018 (0.0037) | +0.0011 (0.0016) | −0.0013 (0.0176) |
+| combined_mild | Histogram gradient boosting | +0.0112 (0.0202) | −0.0088 (0.0080) | −0.0029 (0.0181) |
+| combined_mild | Logistic regression | +0.0026 (0.0077) | −0.0071 (0.0021) | −0.0308 (0.0106) |
+| combined_mild | Random forest | +0.0057 (0.0100) | −0.0064 (0.0043) | −0.0179 (0.0128) |
+| combined_severe | Histogram gradient boosting | +0.0505 (0.0174) | −0.0631 (0.0044) | −0.1341 (0.0083) |
+| combined_severe | Logistic regression | −0.0007 (0.0085) | −0.0903 (0.0074) | −0.2257 (0.0265) |
+| combined_severe | Random forest | +0.0362 (0.0281) | −0.0670 (0.0089) | −0.1407 (0.0134) |
+
+The table contains all 21 model-by-scenario comparisons. The committed files retain all 210 split/model/scenario/adaptation metric rows, 1,050 paired metric differences and 40,320 held-out prediction rows. The rounded summary CSV contains 42 model-by-scenario-by-adaptation rows. The full JSON manifest preserves the run-level metric values.
