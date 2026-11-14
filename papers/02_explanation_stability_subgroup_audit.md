@@ -1,7 +1,7 @@
 # Explanation Stability and Subgroup Audit under Controlled Distribution Shift for Tabular Diabetes Risk Models
 
 **Author:** Ekemini Thompson¹  
-**Affiliation:** ¹Nnamdi Azikiwe University, Awka, Anambra State, Nigeria  
+**Affiliations:** ¹Nnamdi Azikiwe University, Awka, Anambra State, Nigeria; ²VergelAI  
 **Corresponding author:** Ekemini Thompson, ekemini.thompson@outlook.com  
 **ORCID:** [0009-0006-0072-3905](https://orcid.org/0009-0006-0072-3905)  
 **Status:** Supplementary technical report to the calibration and domain-adaptation manuscript  
