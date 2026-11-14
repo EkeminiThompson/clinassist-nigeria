@@ -15,7 +15,7 @@
 
 ## Remaining evidence and author decisions
 
-1. **Original run environment:** the repository CI workflow specifies Python 3.11, but that does not establish the environment used for the reported manuscript runs. The independent verification note separately records Python 3.12, scikit-learn 1.9.1 and XGBoost 3.4.1 for its clean rerun. Original-run OS, CPU, RAM and complete package lock remain unrecorded.
+1. **Original run environment:** the original reported run and 2026-11-13 independent verification run do not have retained CPU, RAM and OS details. The current research CI workflow is pinned to GitHub-hosted ubuntu-24.04 (x86-64), Python 3.11; for public repositories GitHub documents 4 vCPUs and 16 GB RAM. The workflow now logs the actual CPU model, memory and OS for each run. These CI specifications must not be retroactively attributed to historical runs. The independent verification note separately records Python 3.12, scikit-learn 1.9.1 and XGBoost 3.4.1 for its clean rerun.
 2. **Execution evidence for all reported tables:** the source scripts generate all seven scenario summaries and raw paired split-level outputs. The currently committed manuscript presents only the severe-combined scenario table. A successful, retained workflow artifact containing the exact table-producing run must be retrieved and checked before claiming that all seven scenario tables or the AUROC discrepancy have been reconciled. CI workflow configuration alone is not proof that a particular run succeeded.
 3. **AUROC reconciliation:** the exploratory audit deltas (−0.0008, +0.0367, +0.0508) differ slightly from deltas recomputed from rounded Table 2 means (−0.0007, +0.0362, +0.0505). Recompute from unrounded paired split-level output and use one authoritative calculation. Do not infer it from rounded means.
 4. **Hyperparameter search:** no tuning/search routine is present in the reviewed experiment scripts. The author should confirm whether any separate tuning was performed; do not imply optimisation or tuning in the manuscript without records.
@@ -24,11 +24,16 @@
 7. **Supervisor review, author order, contributions and competing interests:** require author/institutional confirmation.
 8. **References and journal style:** verify every reference against its original source and apply the target journal's current citation and bibliography requirements.
 9. **Target-journal checklist:** complete the applicable TRIPOD+AI reporting checklist and any journal-specific submission forms.
-10. **Data terms and archive:** cite the actual OpenML/UCI dataset source and applicable terms used for the experiment. A versioned Zenodo archive with a DOI is recommended after the final code/data manifest has been checked.
+10. **Data terms and archive:** cite the actual OpenML/UCI dataset source and applicable terms used for the experiment. Zenodo deposit is optional. Citation/deposit metadata are prepared in `CITATION.cff` and `.zenodo.json`; no deposit or DOI exists yet. Create a versioned release and archive only after final code and artifacts are checked. See `docs/submission_metadata.md`.
 
 ## Methodological limitation retained
 
 The code applies covariate and missingness transformations to raw held-out test features before the preprocessing pipeline replaces zero values with missing values, imputes and scales. This means a raw zero can be changed by a shift before zero-to-missing conversion. The manuscript should retain this ordering as a limitation unless the protocol is intentionally changed and all affected experiments are rerun.
+
+## Submission metadata requiring confirmation
+
+- The author supplied the name Dr. Joshua Babatunde Agbogun for the Associate Editor field and provided a Federal University Lokoja profile. Confirm that he is the assigned handling editor with the journal before addressing the cover letter to him. Do not present his editorial role as independently verified. See `docs/submission_metadata.md`.
+- ACM author-year BibLaTeX configuration and Zenodo deposit steps are documented in `docs/submission_metadata.md`.
 
 ## Scientific boundary
 
