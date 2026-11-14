@@ -115,7 +115,7 @@ def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
         return {
             "valid_replicates": 0, **empty,
             "status": "insufficient subgroup events",
-        }
+        }, {metric: np.asarray([], dtype=float) for metric in ("auroc", "auprc", "brier")}
 
     n = len(y)
     deltas = {"auroc": [], "auprc": [], "brier": []}
@@ -159,7 +159,7 @@ def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
         return {
             **result, **empty,
             "status": "too few valid bootstrap replicates",
-        }
+        }, {metric: np.asarray(values, dtype=float) for metric, values in deltas.items()}
 
     for metric, values in deltas.items():
         values = np.asarray(values, dtype=float)
@@ -167,7 +167,7 @@ def _paired_bootstrap(y, p_source, p_coral, n_bootstrap, rng):
         result[f"{metric}_ci_lower"] = float(np.quantile(values, 0.025))
         result[f"{metric}_ci_upper"] = float(np.quantile(values, 0.975))
     result["status"] = "ok"
-    return result
+    return result, {metric: np.asarray(values, dtype=float) for metric, values in deltas.items()}
 
 
 def run_audit(n_bootstrap=1000, seed=2026):
@@ -218,6 +218,7 @@ def run_audit(n_bootstrap=1000, seed=2026):
 
     metric_rows = []
     bootstrap_rows = []
+    bootstrap_draw_frames = []
     rng = np.random.default_rng(seed)
 
     for group_col, labels in group_specs:
@@ -253,7 +254,7 @@ def run_audit(n_bootstrap=1000, seed=2026):
                 y_coral = wide[("y_true", "coral")].to_numpy(dtype=int)
                 if not np.array_equal(y_source, y_coral):
                     raise ValueError("Paired predictions do not share identical held-out labels")
-                result = _paired_bootstrap(
+                result, draws = _paired_bootstrap(
                     y_source,
                     wide[("probability", "source_only")].to_numpy(),
                     wide[("probability", "coral")].to_numpy(),
@@ -265,6 +266,21 @@ def run_audit(n_bootstrap=1000, seed=2026):
                     "shift_scenario": scenario, "n": len(y_source),
                     "events": int(y_source.sum()), **result,
                 })
+                if draws["auroc"].size:
+                    draw_frame = pd.DataFrame({
+                        "bootstrap_replicate": np.arange(1, draws["auroc"].size + 1),
+                        "auroc_delta": draws["auroc"],
+                        "auprc_delta": draws["auprc"],
+                        "brier_delta": draws["brier"],
+                    })
+                    draw_frame.insert(0, "shift_scenario", scenario)
+                    draw_frame.insert(0, "model", model)
+                    draw_frame.insert(0, "seed", int(split))
+                    draw_frame.insert(0, "subgroup", label)
+                    draw_frame.insert(0, "subgroup_type", group_col)
+                    draw_frame.insert(0, "events", int(y_source.sum()))
+                    draw_frame.insert(0, "n", len(y_source))
+                    bootstrap_draw_frames.append(draw_frame)
 
     if not metric_rows or not bootstrap_rows:
         raise RuntimeError("Subgroup audit produced no result rows")
@@ -274,10 +290,21 @@ def run_audit(n_bootstrap=1000, seed=2026):
     OUT.mkdir(parents=True, exist_ok=True)
     metrics_path = OUT / "subgroup_metrics.csv"
     bootstrap_path = OUT / "subgroup_paired_bootstrap.csv"
+    draws_path = OUT / "subgroup_bootstrap_draws.csv.gz"
     metrics.to_csv(metrics_path, index=False)
     bootstrap.to_csv(bootstrap_path, index=False)
+    if bootstrap_draw_frames:
+        pd.concat(bootstrap_draw_frames, ignore_index=True).to_csv(
+            draws_path, index=False, compression="gzip"
+        )
+    else:
+        pd.DataFrame(columns=[
+            "n", "events", "subgroup_type", "subgroup", "seed", "model",
+            "shift_scenario", "bootstrap_replicate", "auroc_delta",
+            "auprc_delta", "brier_delta",
+        ]).to_csv(draws_path, index=False, compression="gzip")
 
-    if not metrics_path.stat().st_size or not bootstrap_path.stat().st_size:
+    if not metrics_path.stat().st_size or not bootstrap_path.stat().st_size or not draws_path.stat().st_size:
         raise RuntimeError("Subgroup audit generated an empty output file")
     allowed_statuses = {"ok", "insufficient subgroup events"}
     unexpected = bootstrap[~bootstrap["status"].isin(allowed_statuses)]
@@ -289,6 +316,8 @@ def run_audit(n_bootstrap=1000, seed=2026):
         "comparisons_with_unexpected_status": len(unexpected),
         "metrics_output": str(metrics_path),
         "bootstrap_output": str(bootstrap_path),
+        "bootstrap_draws_output": str(draws_path),
+        "bootstrap_draw_rows": sum(len(frame) for frame in bootstrap_draw_frames),
         "minimum_stratum_n": MIN_N,
         "minimum_events_per_class": MIN_CLASS,
         "interpretation": "Exploratory Pima strata only; not Nigerian external validation or fairness certification.",
