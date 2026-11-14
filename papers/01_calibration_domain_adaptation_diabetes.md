@@ -61,11 +61,11 @@ Five random seeds (42–46). Stratified 75:25 train/test partitions (576 trainin
 
 ### 2.4 Classifiers and probability calibration
 
-Logistic regression (balanced class weights), random forest (250 trees, max depth 6), and histogram gradient boosting (150 iterations). Each classifier used sigmoid probability calibration with three-fold cross-validation on source-training data.
+Logistic regression (class_weight=balanced), random forest (250 trees; maximum depth 6), and scikit-learn histogram gradient boosting (150 boosting iterations) were used in the shift study. Each shift-study classifier used sigmoid probability calibration with three-fold cross-validation on source-training data. These settings describe the shift-study models, not the separate uncalibrated baseline comparison in Table 1. The baseline experiment used scikit-learn's `GradientBoostingClassifier` for its gradient-boosting row, not `HistGradientBoostingClassifier`; its pooled out-of-fold metrics are reported separately and must not be directly compared with the repeated-split, calibrated shift-study results. Full estimator constructor arguments and XGBoost-specific TreeSHAP model settings must be verified against the executed experiment scripts before submission.
 
 ### 2.5 Prespecified shift scenarios and parameters
 
-The seven target-domain conditions comprise an unshifted reference condition, mild covariate shift, severe covariate shift, 10% missing-completely-at-random (MCAR), 10% glucose-dependent missing-at-random (MAR), combined mild shift, and combined severe shift. Covariate-shift severity is 0.5 (mild) or 1.5 (severe). The combined mild condition applies severity 0.5 with 10% MCAR missingness; the combined severe condition applies severity 1.5 with 20% glucose-dependent MAR missingness. The single-mechanism missingness conditions use 10% missingness. The severe-combined result tables in this manuscript therefore refer to 20%, not 10%, missingness.
+The seven target-domain conditions comprise an unshifted reference condition, mild covariate shift, severe covariate shift, 10% missing-completely-at-random (MCAR), 10% glucose-dependent missing-at-random (MAR), combined mild shift, and combined severe shift. Covariate transformations are applied to raw held-out values before the zero-to-missing preprocessing step; consequently, some recorded zeros can become non-zero in shifted scenarios and will not subsequently be recoded as missing. This ordering is retained as a methodological limitation. Covariate-shift severity is 0.5 (mild) or 1.5 (severe). The combined mild condition applies severity 0.5 with 10% MCAR missingness; the combined severe condition applies severity 1.5 with 20% glucose-dependent MAR missingness. The single-mechanism missingness conditions use 10% missingness. The severe-combined result tables in this manuscript therefore refer to 20%, not 10%, missingness.
 
 The manuscript records the scenario-level rates and severity values available in the experiment documentation. The exact feature-wise transformation equations and per-scenario random seeds must be checked against the versioned experiment script before submission; they are not reconstructed from outcome tables.
 
@@ -94,6 +94,10 @@ TreeSHAP for random forest and XGBoost on 100 held-out examples; Gaussian noise 
 ### 2.9 Exploratory subgroup audit
 
 Age and BMI strata with eligibility ≥20 observations and ≥5 events per class. Paired bootstrap (1,000 draws) for source-only versus CORAL. Sparse strata suppressed.
+
+### 2.10 Software environment
+
+The independent verification report records Python 3.12, scikit-learn 1.9.1 and XGBoost 3.4.1 for the clean verification run dated 2026-11-13. These versions are not asserted to be the exact environment of every original experiment run. The remaining dependency versions and hardware for the original table-producing run must be captured from its environment manifest before final submission.
 
 ## 3. Results
 
