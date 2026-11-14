@@ -62,3 +62,16 @@ def test_vectorized_average_precision_matches_sklearn_with_tied_scores():
         average_precision_score(y, p) for y, p in zip(labels, scores)
     ])
     np.testing.assert_allclose(actual, expected, rtol=0, atol=1e-12)
+
+def test_paired_bootstrap_can_return_unaggregated_draws_without_changing_default_api():
+    y = np.array([0, 1] * 30)
+    p_source = np.where(y == 1, 0.8, 0.2)
+    p_coral = np.where(y == 1, 0.85, 0.15)
+    result, draws = _paired_bootstrap(
+        y, p_source, p_coral, 1000, np.random.default_rng(4),
+        return_draws=True,
+    )
+    assert result["status"] == "ok"
+    assert len(draws["auroc"]) == result["valid_replicates"]
+    assert len(draws["auprc"]) == result["valid_replicates"]
+    assert len(draws["brier"]) == result["valid_replicates"]
