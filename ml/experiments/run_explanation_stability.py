@@ -19,7 +19,7 @@ def run_stability(seed=42,n_explain=100,noise_levels=(.01,.05,.10)):
     X,y=load_pima_benchmark(str(DATA));train_x,test_x,train_y,_=train_test_split(X,y,test_size=.25,stratify=y,random_state=seed)
     prep=build_preprocessing_pipeline();xs=prep.fit_transform(train_x);xt=prep.transform(test_x)
     rng=np.random.default_rng(seed);xt=xt[:min(n_explain,len(xt))]
-    background=xs[:min(100,len(xs))];rows=[]
+    background=xs[:min(100,len(xs))];rows=[];raw_rows=[]
     for name,model in models(seed).items():
         model.fit(xs,train_y)
         base=tree_shap_values(model,background,xt,FEATURE_COLUMNS)
@@ -30,7 +30,8 @@ def run_stability(seed=42,n_explain=100,noise_levels=(.01,.05,.10)):
             changed_ranks=ranked_features(changed,FEATURE_COLUMNS)
             scores=[rank_biased_overlap(a,b,p=.9) for a,b in zip(base_ranks,changed_ranks)]
             rows.append({"model":name,"noise_sigma_standardized":sigma,"n_explanations":len(scores),"mean_rbo":float(np.mean(scores)),"std_rbo":float(np.std(scores)),"seed":seed})
-    frame=pd.DataFrame(rows);OUT.mkdir(parents=True,exist_ok=True);frame.to_csv(OUT/"explanation_stability.csv",index=False)
+            raw_rows.extend({"model":name,"noise_sigma_standardized":sigma,"seed":seed,"explanation_index":i,"rbo":float(score)} for i,score in enumerate(scores))
+    frame=pd.DataFrame(rows);raw_frame=pd.DataFrame(raw_rows);OUT.mkdir(parents=True,exist_ok=True);frame.to_csv(OUT/"explanation_stability.csv",index=False);raw_frame.to_csv(OUT/"explanation_stability_raw.csv",index=False)
     return frame
 if __name__=="__main__":
     parser=argparse.ArgumentParser();parser.add_argument("--seed",type=int,default=42);parser.add_argument("--n-explain",type=int,default=100);args=parser.parse_args()
