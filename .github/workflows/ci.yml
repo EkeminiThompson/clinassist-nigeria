@@ -37,10 +37,22 @@ jobs:
       - run: npm install
       - run: npm run build
   research-benchmarks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
+      - name: Record reproduction hardware and operating system
+        run: |
+          echo "=== Operating system ==="
+          cat /etc/os-release
+          echo "=== Kernel ==="
+          uname -a
+          echo "=== CPU ==="
+          lscpu
+          echo "=== Memory ==="
+          grep -E 'MemTotal|MemAvailable' /proc/meminfo
+          echo "=== Python ==="
+          python3 --version
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
