@@ -115,12 +115,15 @@ The CI workflow configures these commands and artifact upload. A workflow defini
 
 ## Verified execution record
 
-- Successful GitHub Actions run: **#156**, run ID `43558361142`.
-- Source commit: `bc8611e42eac4832e5260804fb31bae1736fd17e`.
+- Successful GitHub Actions run: **#164**, run ID `43571713333`.
+- Source commit: `9d31dfbb6105168abca0d62706f1f98dec01feec`.
 - All seven scenarios completed for seeds 42–46, three models and two adaptation arms: 210 run-level rows.
 - Summary: 42 model/scenario/adaptation rows.
 - Paired differences: 1,050 rows across ten metrics.
 - Held-out predictions: 40,320 rows.
-- Workflow artifact: `clinassist-research-results`, 1,103,140 bytes compressed; SHA-256 `934d18546c3147797e3a48900b9956e2e8fd463965c651e1fe6a890ff258b222`.
-- The workflow committed the five shift-study result files and Pima provenance manifest in Git at commit `6764354763d2fb3e0568e597942ecff628e110c3`; the Actions artifact remains an additional 90-day copy.
+- Workflow artifact: `clinassist-research-results`, 1,103,250 bytes compressed; SHA-256 `de58d936100cd1ae67c3e2404f57295132feeeb50713881d56f4bdd20427c572`.
+- The workflow committed the five shift-study result files and Pima provenance manifest in Git at commit `79438a8927669a2d18924200619e1fd8c98b069a`; the Actions artifact remains an additional 90-day copy.
 - No benchmark source CSV is committed. The manifest records OpenML dataset ID 37, 768 rows, class counts and the retrieved CSV checksum.
+
+
+**Bitwise reproducibility note:** a subsequent fixed-seed rerun showed sub-micro floating-point variation in some unrounded calibration and paired-difference fields. The rounded scenario summaries and Appendix B paired comparisons remained unchanged to four decimal places. The committed output snapshot is the successful run #164; later CI runs retain artifacts but do not automatically rewrite this reviewed snapshot.
