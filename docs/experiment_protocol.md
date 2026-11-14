@@ -127,3 +127,13 @@ The CI workflow configures these commands and artifact upload. A workflow defini
 
 
 **Bitwise reproducibility note:** a subsequent fixed-seed rerun showed sub-micro floating-point variation in some unrounded calibration and paired-difference fields. The rounded scenario summaries and Appendix B paired comparisons remained unchanged to four decimal places. The committed output snapshot is the successful run #164; later CI runs retain artifacts but do not automatically rewrite this reviewed snapshot.
+
+## Statistical comparison added for the frozen five-split output
+
+The analysis script ml/analysis/paired_sign_flip_tests.py reads the committed split-level paired differences and enumerates all 2^5=32 sign assignments for each two-sided exact sign-flip test. It analyses AUROC, Brier and ECE for each of the 21 model-by-scenario comparisons (63 tests total), then applies Holm adjustment within each metric family. The generated table is ml/artifacts/experiments/paired_sign_flip_tests.csv.
+
+With five pairs, the minimum attainable two-sided p-value is 0.0625. No result reaches 0.05; Holm-adjusted values are 1.00. The five train/test splits overlap, so this is an exploratory sensitivity analysis at split level, not confirmatory population inference. Do not describe any result as statistically significant. A larger, independently designed evaluation would be needed for confirmatory inference.
+
+## Licensing boundary
+
+The original benchmark is OpenML dataset 37, version 1. The OpenML record labels it Public but does not supply a specific CC or SPDX licence identifier. The source CSV is not redistributed here; users must retain original dataset attribution and follow the source terms. The author's generated analysis outputs are CC BY 4.0 to the extent of author-held rights, while source labels retain their original rights and terms. Software remains MIT-licensed. See DATA-LICENSE.md.
