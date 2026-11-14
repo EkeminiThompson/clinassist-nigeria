@@ -152,6 +152,37 @@ The analysis uses a public historical benchmark and controlled synthetic shifts.
 Analysis code, experiment manifests, provenance documentation and independent verification report: `EkeminiThompson/clinassist-nigeria`. Benchmark data retrieved from OpenML with recorded checksum.
 
 
+
+## Appendix B. Complete seven-scenario paired comparison
+
+The complete repeated-split outputs are committed under `ml/artifacts/experiments/`. The table below reports the mean (SD) across five paired split-level differences, calculated as CORAL minus source-only from the unrounded run-level metrics. Negative Brier and ECE differences indicate lower error; positive AUROC differences indicate improved discrimination. These are descriptive paired differences on the public Pima benchmark under controlled transformations, not external validation.
+
+| Shift scenario | Model | ΔAUROC, mean (SD) | ΔBrier, mean (SD) | ΔECE, mean (SD) |
+|---|---|---:|---:|---:|
+| reference | Histogram gradient boosting | +0.0019 (0.0097) | −0.0005 (0.0040) | −0.0067 (0.0178) |
+| reference | Logistic regression | −0.0019 (0.0060) | +0.0005 (0.0024) | +0.0081 (0.0102) |
+| reference | Random forest | −0.0021 (0.0048) | +0.0009 (0.0020) | −0.0089 (0.0209) |
+| covariate_mild | Histogram gradient boosting | +0.0050 (0.0110) | −0.0056 (0.0052) | −0.0071 (0.0304) |
+| covariate_mild | Logistic regression | −0.0011 (0.0061) | −0.0084 (0.0023) | −0.0405 (0.0162) |
+| covariate_mild | Random forest | +0.0021 (0.0110) | −0.0057 (0.0050) | −0.0177 (0.0166) |
+| covariate_severe | Histogram gradient boosting | +0.0437 (0.0147) | −0.0585 (0.0052) | −0.1216 (0.0194) |
+| covariate_severe | Logistic regression | −0.0004 (0.0071) | −0.0907 (0.0076) | −0.2232 (0.0214) |
+| covariate_severe | Random forest | +0.0373 (0.0264) | −0.0619 (0.0079) | −0.1354 (0.0296) |
+| mcar_10 | Histogram gradient boosting | −0.0006 (0.0097) | +0.0004 (0.0043) | −0.0022 (0.0352) |
+| mcar_10 | Logistic regression | +0.0011 (0.0071) | −0.0010 (0.0030) | +0.0012 (0.0097) |
+| mcar_10 | Random forest | −0.0033 (0.0036) | +0.0010 (0.0015) | +0.0049 (0.0208) |
+| mar_like_10 | Histogram gradient boosting | +0.0007 (0.0081) | +0.0013 (0.0021) | −0.0076 (0.0301) |
+| mar_like_10 | Logistic regression | −0.0019 (0.0066) | +0.0009 (0.0027) | +0.0045 (0.0093) |
+| mar_like_10 | Random forest | −0.0018 (0.0037) | +0.0011 (0.0016) | −0.0013 (0.0176) |
+| combined_mild | Histogram gradient boosting | +0.0112 (0.0202) | −0.0088 (0.0080) | −0.0029 (0.0181) |
+| combined_mild | Logistic regression | +0.0026 (0.0077) | −0.0071 (0.0021) | −0.0308 (0.0106) |
+| combined_mild | Random forest | +0.0057 (0.0100) | −0.0064 (0.0043) | −0.0179 (0.0128) |
+| combined_severe | Histogram gradient boosting | +0.0505 (0.0174) | −0.0631 (0.0044) | −0.1341 (0.0083) |
+| combined_severe | Logistic regression | −0.0007 (0.0085) | −0.0903 (0.0074) | −0.2257 (0.0265) |
+| combined_severe | Random forest | +0.0362 (0.0281) | −0.0670 (0.0089) | −0.1407 (0.0134) |
+
+The table contains all 21 model-by-scenario comparisons. The committed files retain all 210 split/model/scenario/adaptation metric rows, 1,050 paired metric differences and 40,320 held-out prediction rows. The rounded summary CSV contains 42 model-by-scenario-by-adaptation rows. The full JSON manifest preserves the run-level metric values.
+
 ## Appendix A. Computing environment
 
 The repository's reproducibility workflow runs the research-benchmark job on a GitHub-hosted `ubuntu-24.04` x86-64 runner. For public repositories, GitHub documents the standard runner configuration as 4 vCPUs and 16 GB RAM. The workflow records the actual CPU model, logical CPU count, memory and operating-system release in the run log for each execution. The Python environment for this workflow is Python 3.11, as configured in `.github/workflows/ci.yml`.
