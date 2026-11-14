@@ -49,6 +49,8 @@ The contribution is an auditable, repeated-split evaluation pipeline that jointl
 
 ### 2.1 Study design and data source
 
+The design is a controlled computational benchmark rather than a clinical validation study. The Pima benchmark was selected because it is a documented, publicly accessible, fixed-size binary clinical dataset that permits transparent reproduction of the complete pipeline; it was not selected as a proxy for Nigerian patients. The three classifiers provide complementary inductive biases: logistic regression is a regularised linear reference, random forest captures nonlinear interactions through bagged trees, and histogram gradient boosting provides a boosted-tree comparator with efficient tabular fitting. The comparison is methodological and is not intended to identify a clinically deployable winner.
+
 This was a retrospective computational benchmark study using OpenML dataset ID 37 (dataset name: diabetes; version 1), originally sourced from the UCI Pima Indians Diabetes Database. The dataset contains 768 records, eight predictors and a binary outcome. The class distribution was 500 outcome-negative and 268 outcome-positive records.
 
 ### 2.2 Preprocessing
@@ -67,11 +69,15 @@ The baseline experiment used scikit-learn's `GradientBoostingClassifier`, not `H
 
 ### 2.5 Prespecified shift scenarios and parameters
 
+The scenario grid separates covariate perturbation from two missingness mechanisms, then combines them at mild and severe levels. The reference condition anchors each split; mild/severe covariate-only conditions isolate feature-distribution changes; MCAR and glucose-dependent MAR-like conditions isolate incomplete measurement; combined conditions test interaction between shift types. The numerical severities are controlled stress-test settings chosen to create ordered perturbation levels, not estimates of observed Nigerian or clinical shift magnitudes.
+
 The seven target-domain conditions comprise an unshifted reference condition, mild covariate shift, severe covariate shift, 10% missing-completely-at-random (MCAR), 10% glucose-dependent missing-at-random (MAR), combined mild shift, and combined severe shift. Covariate transformations are applied to raw held-out values before the zero-to-missing preprocessing step; consequently, some recorded zeros can become non-zero in shifted scenarios and will not subsequently be recoded as missing. This ordering is retained as a methodological limitation. Covariate-shift severity is 0.5 (mild) or 1.5 (severe). The combined mild condition applies severity 0.5 with 10% MCAR missingness; the combined severe condition applies severity 1.5 with 20% glucose-dependent MAR missingness. The single-mechanism missingness conditions use 10% missingness. The severe-combined result tables in this manuscript therefore refer to 20%, not 10%, missingness.
 
 The executable protocol applies these transformations to raw held-out features before zero-to-missing conversion, imputation and scaling. For severity `s` (0.5 or 1.5), glucose is transformed as `G' = G(1 + 0.15s) + 5s`, BMI as `B' = B(1 + 0.10s) + 1.5s`, and age as `A' = A(1 + 0.05s) + 2s`; other features are not directly shifted. For each split seed `r` (42–46), scenario index `j` (zero-based, in the order listed above) uses missingness RNG seed `r + 1000j`. MCAR independently masks every feature cell with probability 0.10. The MAR-like mechanism standardises shifted glucose within the held-out set to `z`, computes row probability `q_i = clip(2m/(1 + exp(-z_i)), 0, 1)`, where `m` is the configured missing rate, and independently masks skin thickness and insulin for each row using `q_i`. The combined severe condition therefore uses `m = 0.20`. The reference condition has no transformation or missingness. The exact implementation is in `ml/experiments/run_shift_study.py`; these are controlled perturbations, not observed population shifts.
 
 ### 2.6 Domain adaptation
+
+CORAL was selected as a transparent, label-free comparator because it aligns first- and second-order feature statistics and can be fitted from target covariates without target outcomes. It provides a controlled test of unsupervised feature alignment rather than a claim that this method is optimal for clinical transfer.
 
 The source-only arm fits the model using source-training data. In the CORAL arm, the target feature matrix is used without target labels to align source and target means and covariance structure. This is transductive unsupervised adaptation: target covariates are available during adaptation, but target outcomes are reserved for evaluation.
 
@@ -87,13 +93,17 @@ The implementation uses the row-vector mapping `(X_s - mean_s) @ C_s^(-1/2) @ C_
 
 ### 2.7 Performance metrics
 
-AUROC, AUPRC, Brier score, ten-bin ECE, calibration intercept and slope, selective metrics at 80% entropy-based coverage.
+AUROC and AUPRC quantify ranking discrimination, with AUPRC providing a precision–recall view under class imbalance. Brier score measures squared probability error, while ten-bin expected calibration error (ECE), calibration intercept and calibration slope assess agreement between predicted probabilities and observed outcomes. Risk–coverage behaviour and metrics at 80% entropy-based coverage assess the trade-off when predictions with greatest uncertainty are withheld. No single metric is sufficient: a model can preserve ranking while producing poorly calibrated probabilities. The metrics were therefore selected to distinguish discrimination, probability quality and selective-prediction behaviour.
 
 ### 2.8 Explanation stability
+
+TreeSHAP was used because both evaluated estimators are tree-based and TreeSHAP provides a consistent feature-attribution framework for these models. Rank-biased overlap (RBO) with persistence 0.9 gives greater weight to agreement near the top of ranked feature lists; the three noise levels probe progressively larger perturbations on standardised inputs. This analysis measures ranking stability, not explanation fidelity or clinical validity.
 
 TreeSHAP for random forest (250 trees, depth 6, minimum leaf size 3) and XGBoost (180 estimators, depth 3, learning rate 0.04, subsample and column subsample 0.8, L2 penalty 2) on up to 100 held-out examples from the seed-42 split. Standardised Gaussian noise was added at SD 0.01, 0.05 and 0.10 using a NumPy generator initialised with seed 42; feature rankings were compared with rank-biased overlap (persistence 0.9).
 
 ### 2.9 Exploratory subgroup audit
+
+Age and BMI strata were selected as clinically interpretable descriptive slices available in the benchmark. The minimum cell-size and event-count rules reduce unstable summaries in sparse strata; paired bootstrap resampling uses identical patient indices for source-only and CORAL to preserve within-patient pairing. This audit is exploratory and does not establish fairness or subgroup safety.
 
 Age and BMI strata with eligibility ≥20 observations and ≥5 events per class. Paired bootstrap (1,000 draws) for source-only versus CORAL. Sparse strata suppressed.
 
