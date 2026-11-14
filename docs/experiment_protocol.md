@@ -137,3 +137,8 @@ With five pairs, the minimum attainable two-sided p-value is 0.0625. No result r
 ## Licensing boundary
 
 The original benchmark is OpenML dataset 37, version 1. The OpenML record labels it Public but does not supply a specific CC or SPDX licence identifier. The source CSV is not redistributed here; users must retain original dataset attribution and follow the source terms. The author's generated analysis outputs are CC BY 4.0 to the extent of author-held rights, while source labels retain their original rights and terms. Software remains MIT-licensed. See DATA-LICENSE.md.
+
+
+## Unaggregated explanation and subgroup outputs
+
+The TreeSHAP stability script writes `explanation_stability_raw.csv`, one RBO value per explained held-out example, model and perturbation level, in addition to the model/noise summary table. The subgroup audit writes `subgroup_bootstrap_draws.csv.gz`, retaining each valid paired bootstrap replicate's AUROC, AUPRC and Brier deltas together with subgroup, split, model and scenario identifiers. `subgroup_metrics.csv` retains group-level metric rows and `subgroup_paired_bootstrap.csv` retains interval summaries and validity counts. The raw draw file records valid draws; the bootstrap seed (2026 by default), requested replicate count and minimum-valid rule are recorded in the executable protocol. The raw output files are committed by research CI.
