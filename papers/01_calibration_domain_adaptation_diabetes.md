@@ -99,7 +99,7 @@ Age and BMI strata with eligibility ≥20 observations and ≥5 events per class
 
 ### 2.10 Software environment
 
-The independent verification report records Python 3.12, scikit-learn 1.9.1 and XGBoost 3.4.1 for the clean verification run dated 2026-11-13. These versions are not asserted to be the exact environment of every original experiment run. The remaining dependency versions and hardware for the original table-producing run must be captured from its environment manifest before final submission.
+The author's reported local development workstation is a 13-inch MacBook Pro (Mid-2012; model identifier `MacBookPro9,2`) with an Intel Core i5 processor at 2.5 GHz, one physical processor package, two CPU cores and 8 GB RAM. The operating-system information returned by `sw_vers` was ProductName `Mac OS X`, ProductVersion `10.15.8`, BuildVersion `19H2026`. These specifications describe the author's workstation as reported; they are not evidence that every experiment or the final table-producing run was executed on this machine. The independent verification report records Python 3.12, scikit-learn 1.9.1 and XGBoost 3.4.1 for the clean verification run dated 2026-11-13. The separate research CI environment is described in Appendix A. Exact historical run-to-machine mapping and the remaining dependency versions for the original table-producing run were not retained.
 
 ## 3. Results
 
@@ -156,9 +156,11 @@ Analysis code, experiment manifests, provenance documentation and independent ve
 
 ## Appendix A. Computing environment
 
+The author's reported local workstation is a 13-inch MacBook Pro (Mid-2012; `MacBookPro9,2`): Intel Core i5 at 2.5 GHz, two CPU cores, 8 GB RAM, Mac OS X 10.15.8 (build 19H2026). This is a user-reported machine specification and is not, by itself, proof that the historical result-producing experiments were run on this workstation.
+
 The repository's reproducibility workflow runs the research-benchmark job on a GitHub-hosted `ubuntu-24.04` x86-64 runner. For public repositories, GitHub documents the standard runner configuration as 4 vCPUs and 16 GB RAM. The workflow records the actual CPU model, logical CPU count, memory and operating-system release in the run log for each execution. The Python environment for this workflow is Python 3.11, as configured in `.github/workflows/ci.yml`.
 
-**Important distinction:** these are the specifications of the current CI reproduction environment, not verified specifications of the historical experiment run or the independent clean-environment verification dated 2026-11-13. The original run's CPU model, RAM and operating system were not retained and cannot be reconstructed from the reported metrics. Do not attribute the CI hardware to those earlier runs.
+**Important distinction:** the MacBook specifications describe the author's local workstation; the Ubuntu specifications describe the CI reproduction environment. Neither should be attributed to a historical run unless its execution log or contemporaneous environment record confirms that machine. The original table-producing run's exact hardware-to-run mapping was not retained.
 
 
 ## Appendix B. Complete seven-scenario paired comparison
