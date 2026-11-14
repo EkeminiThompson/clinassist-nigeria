@@ -1,8 +1,10 @@
 # Evaluating Calibration, Model Robustness and Domain Adaptation in Diabetes Prediction Across Changing Data Distributions
 
-**Author:** Ekemini Thompson  
-**Affiliation:** Nnamdi Azikiwe University, Awka, Nigeria  
-**Manuscript status:** Research manuscript (v1.0) — results independently verified (2026-11-13)  
+**Author:** Ekemini Thompson¹  
+**Affiliations:** ¹Nnamdi Azikiwe University, Awka, Anambra State, Nigeria  
+**Corresponding author:** Ekemini Thompson, ekemini.thompson@outlook.com  
+**ORCID:** [0009-0006-0072-3905](https://orcid.org/0009-0006-0072-3905)  
+**Manuscript status:** Research manuscript (v1.1) — results independently verified (2026-11-13)  
 **Study type:** Reproducible computational benchmark study
 
 ## Abstract
@@ -65,9 +67,25 @@ Logistic regression (balanced class weights), random forest (250 trees, max dept
 
 Seven scenarios on the held-out feature matrix: reference; mild covariate shift; severe covariate shift; MCAR-like 10%; MAR-like 10%; combined mild; combined severe. Target labels used only for evaluation.
 
+### 2.5 Prespecified shift scenarios and parameters
+
+The seven target-domain conditions comprise an unshifted reference condition, mild covariate shift, severe covariate shift, 10% missing-completely-at-random (MCAR), 10% glucose-dependent missing-at-random (MAR), combined mild shift, and combined severe shift. Covariate-shift severity is 0.5 (mild) or 1.5 (severe). The combined mild condition applies severity 0.5 with 10% MCAR missingness; the combined severe condition applies severity 1.5 with 20% glucose-dependent MAR missingness. The single-mechanism missingness conditions use 10% missingness. The severe-combined result tables in this manuscript therefore refer to 20%, not 10%, missingness.
+
+The manuscript records the scenario-level rates and severity values available in the experiment documentation. The exact feature-wise transformation equations and per-scenario random seeds must be checked against the versioned experiment script before submission; they are not reconstructed from outcome tables.
+
 ### 2.6 Domain adaptation
 
-Source-only arm fitted the calibrated classifier to preprocessed source-training data. CORAL arm aligned source and target second-order statistics using unlabelled target covariates, then fitted the classifier to transformed source data. Target labels were not used for adaptation.
+The source-only arm fits the model using source-training data. In the CORAL arm, the target feature matrix is used without target labels to align source and target means and covariance structure. This is transductive unsupervised adaptation: target covariates are available during adaptation, but target outcomes are reserved for evaluation.
+
+For source matrix $X_s$ and target matrix $X_t$, let $\mu_s$ and $\mu_t$ denote feature means and let $C_s$ and $C_t$ denote regularised covariance matrices, with $C=\operatorname{Cov}(X)+\epsilon I$ and $\epsilon=10^{-5}$. The source-to-target transformation is:
+
+$
+X_{s\rightarrow t}=(X_s-\mu_s)C_s^{-1/2}C_t^{1/2}+\mu_t.
+$
+
+This expression describes both mean and covariance alignment. It must be checked against the exact implementation before submission; target labels are not used to estimate either alignment statistic.
+
+
 
 ### 2.7 Performance metrics
 
@@ -89,7 +107,7 @@ Age and BMI strata with eligibility ≥20 observations and ≥5 events per class
 |---|---:|---:|---:|---:|
 | Logistic regression | 0.8349 | 0.7067 | 0.1571 | 0.0360 |
 | Random forest | 0.8342 | 0.6977 | 0.1574 | 0.0398 |
-| Gradient boosting | 0.8265 | 0.6927 | 0.1676 | 0.0839 |
+| `GradientBoostingClassifier` | 0.8265 | 0.6927 | 0.1676 | 0.0839 |
 | XGBoost | 0.8247 | 0.6920 | 0.1643 | 0.0642 |
 | RBF SVM | 0.8211 | 0.6967 | 0.1642 | 0.0548 |
 
