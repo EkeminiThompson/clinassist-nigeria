@@ -75,7 +75,7 @@ Age'=Age(1+0.05s)+2s
 
 MCAR independently masks each cell with probability (m). The MAR-like mechanism standardises shifted glucose within the held-out matrix, computes (q_i=\operatorname{clip}(2m/(1+e^{-z_i}),0,1)), and independently masks SkinThickness and Insulin for each row with probability (q_i). It is a controlled glucose-dependent missingness mechanism, not a claim about a clinically observed missingness process.
 
-The script writes:
+The baseline script writes `baseline_cv_predictions.csv`, one out-of-fold probability per benchmark row and model, including original row index, fold, and observed label. `baseline_cv_results.json` retains the aggregate five-fold metrics. The shift-study script writes:
 - `synthetic_shift_runs.csv`: unrounded split/model/scenario/arm metrics.
 - `synthetic_shift_predictions.csv`: held-out patient-row labels and probabilities for paired audit.
 - `synthetic_shift_summary.csv`: mean and standard deviation by model, scenario and arm, rounded to five decimals.
