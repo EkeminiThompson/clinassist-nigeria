@@ -13,6 +13,15 @@
 - The baseline estimator settings and shift-study estimator settings are documented from their respective source files.
 - An MIT licence applies to repository software only; it does not relicense the Pima benchmark or third-party assets.
 
+## Checklist repair completed on 2026-11-14
+
+- Evidence-based item-by-item response: `docs/reproducibility_checklist_response.md`.
+- The original dataset is pre-existing OpenML dataset 37; no new dataset was collected. OpenML marks the record Public, but this is not a dataset-specific CC/SPDX licence. Source data are not redistributed; attribution and source terms remain applicable.
+- Software remains MIT-licensed. Author-generated experiment outputs carry a separate CC BY 4.0 notice to the extent of author-held rights; source labels are not relicensed (`DATA-LICENSE.md`).
+- Design and metric rationale expanded in the primary manuscript.
+- Exact two-sided paired sign-flip tests cover 63 contrasts (AUROC, Brier, ECE × 21 model/scenario pairs), with Holm adjustment within each metric family. Minimum attainable unadjusted p = 0.0625; no comparison reaches 0.05. Because only five overlapping splits are available, the tests are exploratory and checklist item 15 remains partially satisfied.
+- No systematic hyperparameter-search routine or log is present in the repository. Checklist item 14 remains not documented pending author confirmation about any tuning outside the repository.
+
 ## Remaining evidence and author decisions
 
 1. **Computing environments:** the author reports a local 13-inch MacBook Pro (Mid-2012; `MacBookPro9,2`), Intel Core i5 2.5 GHz, two CPU cores, 8 GB RAM, Mac OS X 10.15.8 (build 19H2026). This identifies the author's workstation but does not establish that the historical table-producing run used it. The current research CI workflow is pinned to GitHub-hosted ubuntu-24.04 (x86-64), Python 3.11; for public repositories GitHub documents 4 vCPUs and 16 GB RAM. The workflow logs the actual CPU model, memory and OS for each run. These environments must not be conflated. The independent verification note separately records Python 3.12, scikit-learn 1.9.1 and XGBoost 3.4.1 for its clean rerun.
