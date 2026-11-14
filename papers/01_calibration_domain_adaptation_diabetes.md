@@ -63,10 +63,6 @@ Five random seeds (42–46). Stratified 75:25 train/test partitions (576 trainin
 
 Logistic regression (balanced class weights), random forest (250 trees, max depth 6), and histogram gradient boosting (150 iterations). Each classifier used sigmoid probability calibration with three-fold cross-validation on source-training data.
 
-### 2.5 Controlled target-domain scenarios
-
-Seven scenarios on the held-out feature matrix: reference; mild covariate shift; severe covariate shift; MCAR-like 10%; MAR-like 10%; combined mild; combined severe. Target labels used only for evaluation.
-
 ### 2.5 Prespecified shift scenarios and parameters
 
 The seven target-domain conditions comprise an unshifted reference condition, mild covariate shift, severe covariate shift, 10% missing-completely-at-random (MCAR), 10% glucose-dependent missing-at-random (MAR), combined mild shift, and combined severe shift. Covariate-shift severity is 0.5 (mild) or 1.5 (severe). The combined mild condition applies severity 0.5 with 10% MCAR missingness; the combined severe condition applies severity 1.5 with 20% glucose-dependent MAR missingness. The single-mechanism missingness conditions use 10% missingness. The severe-combined result tables in this manuscript therefore refer to 20%, not 10%, missingness.
