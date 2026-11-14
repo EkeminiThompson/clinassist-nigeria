@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import GradientBoostingClassifier, RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold, cross_val_predict
@@ -61,6 +62,10 @@ def run_cv_baselines():
 
     cv = StratifiedKFold(n_splits=N_SPLITS, shuffle=True, random_state=RANDOM_SEED)
     results = {}
+    prediction_rows = []
+    fold_ids = np.full(len(y), -1, dtype=int)
+    for fold_number, (_, test_indices) in enumerate(cv.split(X, y), start=1):
+        fold_ids[test_indices] = fold_number
 
     for name, model in get_models().items():
         pipe = Pipeline(
@@ -76,6 +81,13 @@ def run_cv_baselines():
 
         metrics = full_evaluation(y, oof_prob)
         results[name] = metrics
+        prediction_rows.extend({
+            "model": name,
+            "dataset_row_index": int(row_index),
+            "fold": int(fold_ids[row_index]),
+            "y_true": int(y[row_index]),
+            "probability": float(oof_prob[row_index]),
+        } for row_index in range(len(y)))
         print(f"{name:20s}  AUROC={metrics['auroc']:.4f}  AUPRC={metrics['auprc']:.4f}  "
               f"Brier={metrics['brier']:.4f}  ECE={metrics['ece']:.4f}")
 
@@ -93,7 +105,10 @@ def run_cv_baselines():
             f,
             indent=2,
         )
+    predictions_path = RESULTS_DIR / "baseline_cv_predictions.csv"
+    pd.DataFrame(prediction_rows).to_csv(predictions_path, index=False)
     print(f"\nResults written to {out_path}")
+    print(f"Unaggregated out-of-fold predictions written to {predictions_path}")
     return results
 
 
