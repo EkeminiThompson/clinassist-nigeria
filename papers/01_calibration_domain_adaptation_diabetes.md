@@ -101,6 +101,10 @@ Age and BMI strata with eligibility ≥20 observations and ≥5 events per class
 
 The author's reported local development workstation is a 13-inch MacBook Pro (Mid-2012; model identifier `MacBookPro9,2`) with an Intel Core i5 processor at 2.5 GHz, one physical processor package, two CPU cores and 8 GB RAM. The operating-system information returned by `sw_vers` was ProductName `Mac OS X`, ProductVersion `10.15.8`, BuildVersion `19H2026`. These specifications describe the author's workstation as reported; they are not evidence that every experiment or the final table-producing run was executed on this machine. The independent verification report records Python 3.12, scikit-learn 1.9.1 and XGBoost 3.4.1 for the clean verification run dated 2026-11-13. The separate research CI environment is described in Appendix A. Exact historical run-to-machine mapping and the remaining dependency versions for the original table-producing run were not retained.
 
+### 2.11 Statistical analysis
+
+The primary paired contrast was CORAL minus source-only within each identical split, model and shift scenario. For AUROC, Brier score and ECE, two-sided exact sign-flip permutation tests were applied to the five split-level paired differences for each of the 21 model-by-scenario contrasts (63 tests). The test enumerates all 32 sign assignments and uses the absolute mean paired difference as the test statistic. Holm adjustment was applied separately within each metric family of 21 comparisons. The analysis unit is the repeated split, not the patient. Because the five train/test partitions overlap, the split-level contrasts are dependent; the tests are therefore exploratory sensitivity analyses and do not support population-level or clinical inference. With only five pairs, the smallest attainable two-sided exact p-value is 0.0625. No contrast can reach the conventional 0.05 threshold, even before multiplicity adjustment. The complete results are in `ml/artifacts/experiments/paired_sign_flip_tests.csv`; the executable analysis is `ml/analysis/paired_sign_flip_tests.py`.
+
 ## 3. Results
 
 ### 3.1 Baseline five-fold benchmark
@@ -141,6 +145,10 @@ The author's reported local development workstation is a 13-inch MacBook Pro (Mi
 
 A clean-environment rerun reproduced Table 1 exactly and confirmed CORAL ECE reduction under controlled age and BMI shifts (see `docs/independent_verification.md`).
 
+### 3.5 Exploratory paired sign-flip tests
+
+Exact two-sided sign-flip tests were conducted on the five paired split-level CORAL-minus-source-only differences for AUROC, Brier score and ECE across all 21 model-by-scenario comparisons. The smallest unadjusted p-value was 0.0625, the minimum attainable with five pairs and 32 sign assignments. Holm-adjusted p-values were 1.000 across the reported metric families. No comparison met a two-sided 0.05 threshold. The large and directionally consistent Brier/ECE differences in some imposed-shift conditions should therefore be interpreted as descriptive effects in this small, repeated-split benchmark, not as statistically established improvements. The split overlap and low number of pairs further limit inferential strength. Full test statistics are archived in `ml/artifacts/experiments/paired_sign_flip_tests.csv`.
+
 ## 4. Discussion
 
 CORAL’s benefit is model- and scenario-dependent. Under severe controlled covariate shift, tree ensembles gained discrimination and all models gained calibration; under reference and missingness-only conditions effects were negligible or adverse. Joint reporting of discrimination and calibration is essential.
@@ -149,7 +157,7 @@ The analysis uses a public historical benchmark and controlled synthetic shifts.
 
 ## 5. Data and code availability
 
-Analysis code, experiment manifests, provenance documentation and independent verification report: `EkeminiThompson/clinassist-nigeria`. Benchmark data retrieved from OpenML with recorded checksum.
+Analysis code, experiment manifests, raw run-level metrics, held-out prediction outputs, paired differences, exact sign-flip test results, provenance documentation and independent verification report are available in `EkeminiThompson/clinassist-nigeria`. The original benchmark is an existing public dataset retrieved as OpenML dataset 37 (version 1); it is not a newly introduced dataset and the source CSV is not redistributed in the repository. OpenML records the dataset access status as “Public”; this metadata is not an SPDX or Creative Commons licence grant. The original dataset attribution and use conditions must therefore be followed, and no new licence is asserted for the source dataset. The author-generated experiment summaries and analysis outputs are released under CC BY 4.0 to the extent of rights held by the author; source-dataset rights and conditions remain unaffected. See `DATA-LICENSE.md` and `docs/dataset_provenance.md`.
 
 
 
@@ -192,3 +200,11 @@ The complete repeated-split outputs are committed under `ml/artifacts/experiment
 | combined_severe | Random forest | +0.0362 (0.0281) | −0.0670 (0.0089) | −0.1407 (0.0134) |
 
 The table contains all 21 model-by-scenario comparisons. The committed files retain all 210 split/model/scenario/adaptation metric rows, 1,050 paired metric differences and 40,320 held-out prediction rows. The rounded summary CSV contains 42 model-by-scenario-by-adaptation rows. The full JSON manifest preserves the run-level metric values.
+
+## References
+
+Smith, J. W., Everhart, J. E., Dickson, W. C., Knowler, W. C., & Johannes, R. S. (1988). Using the ADAP learning algorithm to forecast the onset of diabetes mellitus. *Proceedings of the Symposium on Computer Applications and Medical Care*, 261–265.
+
+Vanschoren, J., van Rijn, J. N., Bischl, B., & Torgo, L. (2013). OpenML: Networked science in machine learning. *SIGKDD Explorations*, 15(2), 49–60. https://doi.org/10.1145/2641190.2641198
+
+Feurer, M., van Rijn, J. N., Kadra, A., Gijsbers, P., Mallik, N., Ravi, S., Müller, A., Vanschoren, J., & Hutter, F. (2021). OpenML-Python: An extensible Python API for OpenML. *Journal of Machine Learning Research*, 22(100), 1–5.
