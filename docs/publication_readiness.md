@@ -10,7 +10,7 @@
 2. Supplementary TreeSHAP stability and subgroup audit report with audit counts.
 3. Independent clean-environment experiment rerun (2026-11-13): baseline five-fold metrics match the archived manuscript table; CORAL reduces ECE under controlled age and BMI shifts.
 4. Dataset provenance documentation (Pima / OpenML only; no Nigerian hospital claim).
-5. Executable experiment scripts and CI workflow configuration are present. The existence of the workflow is not itself proof that a particular table-producing run succeeded; retrieve and verify the matching run artifacts before submission.
+5. Full seven-scenario experiment execution verified in successful CI run #156 (run ID `43558361142`): 210 split/model/scenario/adaptation rows, 42 summary rows, 1,050 paired differences and 40,320 held-out prediction rows. Appendix B reports all 21 model-by-scenario paired comparisons. Raw outputs are being committed to the repository by the research CI workflow.
 
 ## Scope of the scientific claim
 
@@ -20,7 +20,7 @@
 
 ## Remaining author / journal steps
 
-- Retrieve the exact successful CI or archived run artifact for the manuscript results; reconcile all seven scenario summaries and paired AUROC differences from unrounded split-level output.
+- Verify the follow-up CI commit that persists the run outputs under `ml/artifacts/experiments/`; retain the successful run ID and commit SHA in the submission package.
 - Original-run hardware, operating system and complete package lock remain unavailable; the current CI runner is pinned and logs hardware details but does not reconstruct historical runs.
 - Confirm whether any separate hyperparameter search was performed.
 - Confirm the Associate Editor assignment before using the author-supplied name Dr. Joshua Babatunde Agbogun in correspondence.
